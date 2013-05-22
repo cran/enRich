@@ -1,0 +1,33 @@
+\name{IPE}
+\alias{IPE}
+%- Also NEED an '\alias' for EACH other topic documented here.
+\title{ Estimating the ImmunoPrecipitation (IP) efficiency of a ChIP-seq experiment.
+}
+\description{
+Calculate the IP efficiency of an experiment by using the mixture model parameters. 
+}
+\usage{
+IPE(para, method = NULL)
+}
+\arguments{
+  \item{para}{
+A numeric vector. The parameters estimated by the mixture model. 
+}
+  \item{method}{
+A charater variable. Can be "poisson" or "NB" and it refers to the densities of the mixture distribution.
+}
+}
+\value{
+IPE estimated value.
+}
+\references{
+Bao et al. (2013). Accounting for immunoprecipitation efficiencies in the statistical analysis of ChIP-seq data. To appear in BMC Bioinformatics.
+}
+\author{
+Yanchun Bao and Veronica Vinciotti 
+}
+\seealso{
+See also \code{\link{mix}, \link{mix.joint},\link{enrich.mix}}
+}
+\keyword{Statistics}
+
