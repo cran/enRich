@@ -59,7 +59,7 @@ For a NB mixture model, mu_S and phi_S are the mean and overdispersion of the si
 \item{method}{The method used for the analysis}
 }
 \references{
-Bao et al. (2013). Accounting for immunoprecipitation efficiencies in the statistical analysis of ChIP-seq data. To appear in BMC Bioinformatics.
+Bao et al. Accounting for immunoprecipitation efficiencies in the statistical analysis of ChIP-seq data. BMC Bioinformatics 2013, 14:169 doi:10.1186/1471-2105-14-169.
 }
 \author{
 Yanchun Bao and Veronica Vinciotti 
@@ -82,7 +82,6 @@ Poisfit.simple<-mix(CBPT30, method="Poisson", exp.label=exp.label[c(2,3)])
 Poisfit.joint<-mix.joint(CBPT30, Poisfit.simple$parameters, method="Poisson", 
     rep.vec=c(1,1), p.vec=c(1,1), exp.label=exp.label[c(2,3)]) 
 
-
 \dontrun{
 ##separate analysis of single experiments using a Poisson latent mixture model for all 8 data sets
 Poisfit.separate<-mix(p300cbp.1000bp, method="Poisson", exp.label=exp.label)
@@ -92,13 +91,11 @@ Poisfit.separate<-mix(p300cbp.1000bp, method="Poisson", exp.label=exp.label)
 Poisfit.joint1<-mix.joint(p300cbp.1000bp, Poisfit.separate$parameters, method="Poisson", 
     rep.vec=c(1,2,2,3,4,4,5,6), p.vec=c(1,2,2,3,4,4,5,6), 
     exp.label=exp.label) 
-Poisfit.joint1$parameters
 
 ## Joint analysis, assuming the same p for two different proteins 
 ##   at the same time point
 Poisfit.joint2<-mix.joint(p300cbp.1000bp, Poisfit.separate$parameters, method="Poisson", 
     rep.vec=c(1,2,2,3,4,4,5,6), p.vec=c(1,2,2,1,2,2,5,5), exp.label=exp.label) 
-Poisfit.joint2$parameters
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

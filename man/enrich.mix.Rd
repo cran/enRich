@@ -46,7 +46,7 @@ A numeric variable. The level of FDR for identifying the differentially bound re
 \item{IPE}{A p-dimensional vector of estimated IP efficiency values for each experiment.}
 }
 \references{
-Bao et al. (2013). Accounting for immunoprecipitation efficiencies in the statistical analysis of ChIP-seq data. To appear in BMC Bioinformatics.
+Bao et al. Accounting for immunoprecipitation efficiencies in the statistical analysis of ChIP-seq data. BMC Bioinformatics 2013, 14:169 doi:10.1186/1471-2105-14-169.
 }
 \author{
 Yanchun Bao and Veronica Vinciotti
@@ -83,30 +83,9 @@ Poisfit.joint1<-mix.joint(p300cbp.1000bp, Poisfit.separate$parameters, method="P
 
 ##Enriched regions for all conditions and differentially bound 
 ## regions between CBP and p300 at T30 using 5% FDR
-
 enrich.mix.j<-enrich.mix(Poisfit.joint1, differential=TRUE, 
    diff.vec=c(0,1,1,0,2,2,0,0))
-   
-
-##Separate analysis of single experiments using a NB latent mixture model
-NBfit.separate<-mix(p300cbp.1000bp, method="NB", exp.label=exp.label)
-
-##Enriched regions for all conditions and differentially bound 
-## regions between CBP and p300 at T0 using 5% FDR
-NBenrich.mix.sep<-enrich.mix(NBfit.separate, analysis="separate", 
-   differential=TRUE, diff.vec=c(1,0,0,2,0,0,0,0))
-
-## Joint analysis combining technical replicates 
-##   (CBPT301,CBPT302 and p300T301,p300T302)
-NBfit.joint1<-mix.joint(p300cbp.1000bp, NBfit.separate$parameters, method="NB", 
-    rep.vec=c(1,2,2,3,4,4,5,6), p.vec=c(1,2,2,3,4,4,5,6), 
-    exp.label=exp.label) 
-
-##Enriched regions for all conditions and differentially bound 
-## regions between CBP and p300 at T30 using 5% FDR
-
-NBenrich.mix.j<-enrich.mix(NBfit.joint1, differential=TRUE, 
-   diff.vec=c(0,1,1,0,2,2,0,0))}
+}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

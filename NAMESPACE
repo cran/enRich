@@ -1,2 +1,3 @@
-export(enrich.mix, FDR, IPE, mix.joint, mix)
+useDynLib(enRich)
+export(mrf, mrf.joint, enrich.mrf, enrich.mix, FDR, IPE, mix, mix.joint)
 

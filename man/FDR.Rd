@@ -22,7 +22,7 @@ A numeric variable. The level of FDR for identifying the enriched regions.
 \item{X}{The index of enriched regions (1: enriched, 0: not-enriched).}
 }
 \references{
-Bao et al. (2013). Accounting for immunoprecipitation efficiencies in the statistical analysis of ChIP-seq data. To appear in BMC Bioinformatics.
+Bao et al. Accounting for immunoprecipitation efficiencies in the statistical analysis of ChIP-seq data. BMC Bioinformatics 2013, 14:169 doi:10.1186/1471-2105-14-169.
 }
 \author{
 Yanchun Bao and Veronica Vinciotti 
