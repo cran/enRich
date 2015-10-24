@@ -7,7 +7,7 @@ mix_offset <-function(data1, method=NULL, initialpara=NULL, k=0, stopdiff=0.0001
 #Log-likelihood based on mixture of NB(mu, size), maximised using optim() function
 	NBlike_phi_offset<-function(para, data1, ppr1, ppr0, mus,mub, k=k)
 	{
-	   N=length(data)
+	   N=length(data1)
 	   phis=para[1]
 	   phib=para[2]
 	   temp1=sum(ppr1*ifelse(data1<k, 0, dnbinom(data1-k, phis, ,mus, log=TRUE)))

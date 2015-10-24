@@ -27,7 +27,7 @@
 void MRFsp(int *data1, int *nsp, int *size, int *met, double *qprior, double *piprior, double *poisprior, double *NBprior, int *N, int *Nb, int *jumpN, double *var, double *var1, double *PP, double *es_pi, double *es_q1, double *es_q0, double *es_lambda1, double *es_mu1, double *es_phi1, double *es_lambda0, double *es_mu0, double *es_phi0, double *loglikeli, double *acrate, double *acrate1)
 {
   int S=*size;
-  int N1=*N;
+//  int N1=*N;
   int bN=*Nb;
   int jN=*jumpN;
   int nr=*nsp;
@@ -61,7 +61,7 @@ void MRFsp(int *data1, int *nsp, int *size, int *met, double *qprior, double *pi
   phi=(double*)malloc(sizeof(double*)*nrI);
   q=(double*)malloc(sizeof(double*)*nrI);
   pi=(double*)malloc(sizeof(double*)*nr);
-  int i, j, j1, j2, k, l, s, z; 
+  int i, j, j1, j2, s, z; 
  
   double *probX, *sumprobX, *probZ, *pX1, *pX0;
   int *indexY;
@@ -153,10 +153,10 @@ void MRFsp(int *data1, int *nsp, int *size, int *met, double *qprior, double *pi
       nZ0[i]=0;
       for (s=0;s<S;s++)
 	{ 
-	  if(data[i*S+s]>cp)
+	   if(data[i*S+s]>cp)
 	    { 
 	      stateX[i*S+s]=1;
-	      n1[i]=n1[i]++;
+	      n1[i]++;
 	      sum1[i]=sum1[i]+data[i*S+s];
 	      stateZ[i*S+s]=2;
 	      indexY[i*S+s]=0;
@@ -164,23 +164,23 @@ void MRFsp(int *data1, int *nsp, int *size, int *met, double *qprior, double *pi
 	  else
 	    {
 	      stateX[i*S+s]=0;
-	      n0[i]=n0[i]++;
+	      n0[i]++;
 	      if (data[i*S+s]==0)
 		{
 		  indexY[i*S+s]=1;
 		  stateZ[i*S+s]=0;
-		  nZ0[i]=nZ0[i]++;
+		  nZ0[i]++;
 		}
 	      else
 		{
 		  indexY[i*S+s]=0;
 		  stateZ[i*S+s]=1;
 		  sumZ1[i]=sumZ1[i]+data[i*S+s];
-		  nZ1[i]=nZ1[i]++;
+		  nZ1[i]++;
 		}
 	    }
 	}
-      if (sum1[i]==0|n1[i]==0)
+      if ((sum1[i]==0)|(n1[i]==0))
 	{
 	  sum1[i]=5;
 	  n1[i]=1;
@@ -328,53 +328,98 @@ void MRFsp(int *data1, int *nsp, int *size, int *met, double *qprior, double *pi
 	  //}
 	  pXcY[0][j*S+0]=((1-pi[j])*indexY[j*S+0]+pi[j]*indexY[j*S+0]*pY[0][j*S+0]+(1-indexY[j*S+0])*pY[0][j*S+0])*Q[0][stateX[j*S+1]];
 	  pXcY[1][j*S+0]=pY[1][j*S+0]*Q[1][stateX[j*S+1]];
-	  probX[j*S+0]=1/(1+exp(log(pXcY[0][j*S+0])-log(pXcY[1][j*S+0])));//posterior distribution of P(X_1=1)
+	  if ((pXcY[0][j*S+0]<=0)&&(pXcY[1][j*S+0]<=0)&&(data[j*S+0]>cp))
+	{ 
+		probX[j*S+0]=1;
+	}
+	else if (pXcY[1][j*S+0]<=0)
+	{
+		probX[j*S+0]=0;
+	}
+	else if (pXcY[0][j*S+0]<=0)
+	{
+		probX[j*S+0]=1;
+	}
+	else
+	{
+      	probX[j*S+0]=1/(1+exp(log(pXcY[0][j*S+0])-log(pXcY[1][j*S+0])));//posterior distribution of P(X_1=1)
+	}
 	  sumprobX[j*S+0]=sumprobX[j*S+0]+probX[j*S+0];
 	  U=runif(0,1);      
 	  if(U<probX[j*S+0])
 	    {
 	      stateX[j*S+0]=1;
-	      n1[j]=n1[j]++;//To get sum_s I(X_s=1)
+	      n1[j]++;//To get sum_s I(X_s=1)
 	    }
 	  else
 	    {
 	      stateX[j*S+0]=0;
-	      n0[j]=n0[j]++;
+	      n0[j]++;
 	    }
 	  //sumprobX[j*S+0]=sumprobX[j*S+0]+stateX[j*S+0];
 	  for (s=1; s<S-1; s++)
 	    {
 	      pXcY[0][j*S+s]=((1-pi[j])*indexY[j*S+s]+pi[j]*indexY[j*S+s]*pY[0][j*S+s]+(1-indexY[j*S+s])*pY[0][j*S+s])*Q[stateX[j*S+s-1]][0]*Q[0][stateX[j*S+s+1]];
 	      pXcY[1][j*S+s]=pY[1][j*S+s]*Q[stateX[j*S+s-1]][1]*Q[1][stateX[j*S+s+1]];
+		if ((pXcY[0][j*S+s]<=0)&&(pXcY[1][j*S+s]<=0)&&(data[j*S+s]>cp))
+	  { 
+		probX[j*S+s]=1;
+	  }
+	  else if (pXcY[1][j*S+s]<=0)
+	  {
+		probX[j*S+s]=0;
+	  }
+	  else if (pXcY[0][j*S+s]<=0)
+	  {
+		probX[j*S+s]=1;
+	  }
+	  else
+	  {
 	      probX[j*S+s]=1/(1+exp(log(pXcY[0][j*S+s])-log(pXcY[1][j*S+s])));//posterior distribution of P(X_1=1)
+	  }
 	      sumprobX[j*S+s]=sumprobX[j*S+s]+probX[j*S+s];
 	      U=runif(0,1);
 	      if(U<probX[j*S+s])
 		{
 		  stateX[j*S+s]=1;
-		  n1[j]=n1[j]++;//To get sum_s I(X_s=1)
+		  n1[j]++;//To get sum_s I(X_s=1)
 		}     
 	      else
 		{
 		  stateX[j*S+s]=0; 
-		  n0[j]=n0[j]++;
+		  n0[j]++;
 		}
 	      //sumprobX[j*S+s]=sumprobX[j*S+s]+stateX[j*S+s];
 	    }
 	  pXcY[0][j*S+S-1]=((1-pi[j])*indexY[j*S+S-1]+pi[j]*indexY[j*S+S-1]*pY[0][j*S+S-1]+(1-indexY[j*S+S-1])*pY[0][j*S+S-1])*Q[stateX[j*S+S-2]][0];
 	  pXcY[1][j*S+S-1]=pY[1][j*S+S-1]*Q[stateX[j*S+S-2]][1];
-	  probX[j*S+S-1]=1/(1+exp(log(pXcY[0][j*S+S-1])-log(pXcY[1][j*S+S-1])));//posterior distribution of P(X_1=1)
+	  if ((pXcY[0][j*S+S-1]<=0)&&(pXcY[1][j*S+S-1]<=0)&&(data[j*S+S-1]>cp))
+	{ 
+		probX[j*S+S-1]=1;
+	}
+	else if (pXcY[1][j*S+S-1]<=0)
+	{
+		probX[j*S+S-1]=0;
+	}
+	else if (pXcY[0][j*S+S-1]<=0)
+	{
+		probX[j*S+S-1]=1;
+	}
+	else
+	{
+	  	probX[j*S+S-1]=1/(1+exp(log(pXcY[0][j*S+S-1])-log(pXcY[1][j*S+S-1])));//posterior distribution of P(X_1=1)
+	}
 	  sumprobX[j*S+S-1]=sumprobX[j*S+S-1]+probX[j*S+S-1];
 	  U=runif(0,1);
 	  if(U<probX[j*S+S-1])
 	    {
 	      stateX[j*S+S-1]=1;
-	      n1[j]=n1[j]++;//To get sum_s I(X_s=1)
+	      n1[j]++;//To get sum_s I(X_s=1)
 	    }     
 	  else
 	    {	  
 	      stateX[j*S+S-1]=0;
-	      n0[j]=n0[j]++;
+	      n0[j]++;
 	    }
       	  //sumprobX[j*S+S-1]=sumprobX[j*S+S-1]+stateX[j*S+S-1];
 	  // 1.2 given stateX we sample stateZ
@@ -395,7 +440,7 @@ void MRFsp(int *data1, int *nsp, int *size, int *met, double *qprior, double *pi
 		    {
 		      stateZ[j*S+s]=1;
 		      sumZ1[j]=sumZ1[j]+data[j*S+s];
-		      nZ1[j]=nZ1[j]++;
+		      nZ1[j]++;
 		    }
 		  else
 		    {
@@ -404,12 +449,12 @@ void MRFsp(int *data1, int *nsp, int *size, int *met, double *qprior, double *pi
 			{
 			  stateZ[j*S+s]=1;
 			  sumZ1[j]=sumZ1[j]+data[j*S+s]; //To get sum_s Y_sI(X_s=0, Z_s=1)
-			  nZ1[j]=nZ1[j]++;//To get sum_s I(X_s=0, Z_s=1)
+			  nZ1[j]++;//To get sum_s I(X_s=0, Z_s=1)
 			}
 		      else
 			{
 			  stateZ[j*S+s]=0;
-			  nZ0[j]=nZ0[j]++;//To get sum_s I(X_s=0, Z_s=0)
+			  nZ0[j]++;//To get sum_s I(X_s=0, Z_s=0)
 			}
 		    }
 		}
@@ -504,7 +549,7 @@ void MRFsp(int *data1, int *nsp, int *size, int *met, double *qprior, double *pi
 	      sumgammaphi1=0;
 	      for (s=0;s<S;s++)
 		{
-		  if (stateX[j*S+s]==1&data[j*S+s]>0)
+		  if ((stateX[j*S+s]==1)&(data[j*S+s]>0))
 		    {
 		      for (j2=0;j2<data[j*S+s];j2++)
 			{
@@ -587,14 +632,14 @@ void MRFsp(int *data1, int *nsp, int *size, int *met, double *qprior, double *pi
 	      sumgammaphi1=0;
 	      for (s=0;s<S;s++)
 		{
-		  if (stateX[j*S+s]==0&stateZ[j*S+s]==1&data[j*S+s]>0)
+		  if ((stateX[j*S+s]==0)&(stateZ[j*S+s]==1)&(data[j*S+s]>0))
 		    {
 		      for (j2=0;j2<data[j*S+s];j2++)
 			{
 			  sumgammaphi0=sumgammaphi0+log(propphi0+j2)-log(phi[j*I+0]+j2);
 			}
 		    }
-		  if (stateX[j*S+s]==1&data[j*S+s]>0)
+		  if ((stateX[j*S+s]==1)&(data[j*S+s]>0))
 		    {
 		      for (j2=0;j2<data[j*S+s];j2++)
 			{
@@ -661,7 +706,7 @@ void MRFsp(int *data1, int *nsp, int *size, int *met, double *qprior, double *pi
       //Rprintf("loglikelihood= %lf\n", logl);
       
       // iteration step 4. pass the results back to R
-      if (z>=bN&z==j1*10+bN)
+      if ((z>=bN)&(z==j1*10+bN))
 	{
 	  for (j=0;j<nr;j++)
 	    {
@@ -686,7 +731,7 @@ void MRFsp(int *data1, int *nsp, int *size, int *met, double *qprior, double *pi
 
 /*      if (z==j1*1000)
       	{
-	  j1=j1++;
+	  j1++;
 	  Rprintf("MCMC step= %d \n", z+1);
 	  for (j=0;j<nr;j++)
 	    {

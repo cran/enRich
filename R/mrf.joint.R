@@ -31,12 +31,12 @@ mrf.joint <-function(data, method=NULL, rep.vec=NULL, p.vec=NULL, exp.label=NULL
 	Nexp=ncol(datacount)
 	if (is.null(exp.label))
 	{	
-		if(is.null(colnames(data1)))
+		if(is.null(colnames(datacount)))
 		{
 			exp.label=paste("Experiment", 1:Nexp, sep="")
 		}else
 		{
-			exp.label=colnames(data1)
+			exp.label=colnames(datacount)
 		}
 	}
 	colnames(data$count)=exp.label

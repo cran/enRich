@@ -27,7 +27,7 @@
 void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, double *qprior1, double *piprior1, double *poisprior1, double *NBprior1, double *qprior2, double *piprior2, double *poisprior2, double *NBprior2, int *N, int *Nb, int *jumpN, double *var, double *var1, double *var2, double *PP1, double *PP2, double *es_q11, double *es_q10, double *es_lambda11, double *es_mu11, double *es_phi11, double *es_pi1, double *es_lambda10, double *es_mu10, double *es_phi10, double *es_q21, double *es_q20, double *es_lambda21, double *es_mu21, double *es_phi21, double *es_pi2, double *es_lambda20, double *es_mu20, double *es_phi20, double *loglikeli, double *acrate, double *acrate1, double *acrate2)
 {
   int S=*size;
-  int N1=*N;
+//  int N1=*N;
   int bN=*Nb;
   int jN=*jumpN;
   int nsr1=*(nsr+0);
@@ -50,7 +50,8 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
   int i, i1, i2, j, j1, j2, s, z; 
   double *sum2X;//using for counting pairs of X
   sum2X=(double*)malloc(sizeof(double*)*(S-1));
-  double U,U1,temp, temp1, temp2,a,b,logl;
+  double U,U1, temp,a,b,logl;
+//  double temp1, temp2;
 
   // Definition used for first data set of condition 1
   double AQrep1, BQrep1, *AQnrep1, *BQnrep1;  // priors of transition probabilities q0.
@@ -361,12 +362,17 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
     }
  
  //////// give initial values, set X=1 if Y>cp, where cp is initial cutting points
-  double *sumZrep1, *sumrep1, *sumZnrep1, *sumnrep1;
+//  int cutvalue, cutvaluerep1, cutvaluerep2; 
+  int *sumrep1Y, *sumrep2Y;
+//  cutvaluerep1=cp*nsr1;
+//  cutvaluerep2=cp*nsr2;
+  double *sumZrep1, *sumrep1, *sumZnrep1, *sumnrep1; 
   int nrep11, nrep10, *nZrep11, *nZrep10, *nnrep11,*nnrep10, *nZnrep11,*nZnrep10;
   if (nsr1>0)
     {
       sumZrep1=(double*)malloc(sizeof(double*)*nsr1);
       sumrep1=(double*)malloc(sizeof(double*)*nsr1);
+      sumrep1Y=(int*)malloc(sizeof(int*)*S);
       nZrep11=(int*)malloc(sizeof(int*)*nsr1);
       nZrep10=(int*)malloc(sizeof(int*)*nsr1);
     }
@@ -374,6 +380,7 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
     {
       sumZrep1=NULL;
       sumrep1=NULL;
+      sumrep1Y=NULL;
       nrep11=0;
       nrep10=0;
       nZrep11=NULL;
@@ -404,6 +411,7 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
     {
       sumZrep2=(double*)malloc(sizeof(double*)*nsr2);
       sumrep2=(double*)malloc(sizeof(double*)*nsr2);
+      sumrep2Y=(int*)malloc(sizeof(int*)*S);
       nZrep21=(int*)malloc(sizeof(int*)*nsr2);
       nZrep20=(int*)malloc(sizeof(int*)*nsr2);
     }
@@ -411,6 +419,7 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
     {
       sumZrep2=NULL;
       sumrep2=NULL;
+      sumrep2Y=NULL;
       nrep21=0;
       nrep20=0;
       nZrep21=NULL;
@@ -443,20 +452,20 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
       nrep10=0;
       for (s=0;s<S;s++)
 	{
-	  temp1=0;
+	  sumrep1Y[s]=0;
 	  for (i=0;i<nsr1;i++)
 	    {
-	      temp1=temp1+dataset1[i*S+s];
+	      sumrep1Y[s]=sumrep1Y[s]+dataset1[i*S+s];
 	    }
-	  if (temp1>cp*(nsr1-1))
+	  if (sumrep1Y[s]>cp*nsr1)
 	    {
 	      stateXrep1[s]=1;
-	      nrep11=nrep11++;
+	      nrep11++;
 	    }
 	  else
 	    {
 	      stateXrep1[s]=0;
-	      nrep10=nrep10++;
+	      nrep10++;
 	    }
 	}
     }
@@ -466,20 +475,20 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
       nrep20=0;
       for (s=0;s<S;s++)
 	{
-	  temp2=0;
+	  sumrep2Y[s]=0;
 	  for (i=0;i<nsr2;i++)
 	    {
-	      temp2=temp2+dataset2[i*S+s];
+	      sumrep2Y[s]=sumrep2Y[s]+dataset2[i*S+s];
 	    }
-	  if (temp2>cp*(nsr2-1))
+	  if (sumrep2Y[s]>cp*nsr2)
 	    {
 	      stateXrep2[s]=1;
-	      nrep21=nrep21++;
+	      nrep21++;
 	    }
 	  else
 	    {
 	      stateXrep2[s]=0;
-	      nrep20=nrep20++;
+	      nrep20++;
 	    }
 	}
     }
@@ -506,18 +515,18 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 		    {
 		      indexY1[i*S+s]=1;
 		      stateZ1[i*S+s]=0;
-		      nZrep10[i]=nZrep10[i]++;
+		      nZrep10[i]++;
 		    }
 		  else
 		    {
 		      indexY1[i*S+s]=0;
 		      stateZ1[i*S+s]=1;
 		      sumZrep1[i]=sumZrep1[i]+dataset1[i*S+s];
-		      nZrep11[i]=nZrep11[i]++;
+		      nZrep11[i]++;
 		    }
 		}
 	    }
-	  if (sumrep1[i]==0|nrep11==0)
+	  if ((sumrep1[i]==0)|(nrep11==0))
 	    {
 	      sumrep1[i]=5;
 	      nrep11=1;
@@ -579,18 +588,18 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 		    {
 		      indexY2[i*S+s]=1;
 		      stateZ2[i*S+s]=0;
-		      nZrep20[i]=nZrep20[i]++;
+		      nZrep20[i]++;
 		    }
 		  else
 		    {
 		      indexY2[i*S+s]=0;
 		      stateZ2[i*S+s]=1;
 		      sumZrep2[i]=sumZrep2[i]+dataset2[i*S+s];
-		      nZrep21[i]=nZrep21[i]++;
+		      nZrep21[i]++;
 		    }
 		}
 	    }
-	  if (sumrep2[i]==0|nrep21==0)
+	  if ((sumrep2[i]==0)|(nrep21==0))
 	    {
 	      sumrep2[i]=5;
 	      nrep21=1;
@@ -646,7 +655,7 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 	      if(dataset1[i1*S+s]>cp)
 		{ 
 		  stateXnrep1[i*S+s]=1;
-		  nnrep11[i]=nnrep11[i]++;
+		  nnrep11[i]++;
 		  sumnrep1[i]=sumnrep1[i]+dataset1[i1*S+s];
 		  stateZ1[i1*S+s]=2;
 		  indexY1[i1*S+s]=0;
@@ -654,23 +663,23 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 	      else
 		{
 		  stateXnrep1[i*S+s]=0;
-		  nnrep10[i]=nnrep10[i]++;
+		  nnrep10[i]++;
 		  if (dataset1[i1*S+s]==0)
 		    {
 		      indexY1[i1*S+s]=1;
 		      stateZ1[i1*S+s]=0;
-		      nZnrep10[i]=nZnrep10[i]++;
+		      nZnrep10[i]++;
 		    }
 		  else
 		    {
 		      indexY1[i1*S+s]=0;
 		      stateZ1[i1*S+s]=1;
 		      sumZnrep1[i]=sumZnrep1[i]+dataset1[i1*S+s];
-		      nZnrep11[i]=nZnrep11[i]++;
+		      nZnrep11[i]++;
 		    }
 		}
 	    }
-	  if (sumnrep1[i]==0|nnrep11[i]==0)
+	  if ((sumnrep1[i]==0)|(nnrep11[i]==0))
 	    {
 	      sumnrep1[i]=5;
 	      nnrep11[i]=1;
@@ -728,7 +737,7 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 	      if(dataset2[i2*S+s]>cp)
 		{ 
 		  stateXnrep2[i*S+s]=1;
-		  nnrep21[i]=nnrep21[i]++;
+		  nnrep21[i]++;
 		  sumnrep2[i]=sumnrep2[i]+dataset2[i2*S+s];
 		  stateZ2[i2*S+s]=2;
 		  indexY2[i2*S+s]=0;
@@ -736,23 +745,23 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 	      else
 		{
 		  stateXnrep2[i*S+s]=0;
-		  nnrep20[i]=nnrep20[i]++;
+		  nnrep20[i]++;
 		  if (dataset2[i2*S+s]==0)
 		    {
 		      indexY2[i2*S+s]=1;
 		      stateZ2[i2*S+s]=0;
-		      nZnrep20[i]=nZnrep20[i]++;
+		      nZnrep20[i]++;
 		    }
 		  else
 		    {
 		      indexY2[i2*S+s]=0;
 		      stateZ2[i2*S+s]=1;
 		      sumZnrep2[i]=sumZnrep2[i]+dataset2[i2*S+s];
-		      nZnrep21[i]=nZnrep21[i]++;
+		      nZnrep21[i]++;
 		    }
 		}
 	    }
-	  if (sumnrep2[i]==0|nnrep21[i]==0)
+	  if ((sumnrep2[i]==0)|(nnrep21[i]==0))
 	    {
 	      sumnrep2[i]=5;
 	      nnrep21[i]=1;
@@ -944,18 +953,33 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 	    }
 	  pXcYrep1[0][0]=pXcYrep1[0][0]*Q[0][stateXrep1[1]];
 	  pXcYrep1[1][0]=pXcYrep1[1][0]*Q[1][stateXrep1[1]];
+	if ((pXcYrep1[0][0]<=0)&&(pXcYrep1[1][0]<=0)&&(sumrep1Y[0]>cp*nsr1))
+	{ 
+		probXrep1[0]=1;
+	}
+	else if (pXcYrep1[1][0]<=0)
+	{
+		probXrep1[0]=0;
+	}
+	else if (pXcYrep1[0][0]<=0)
+	{
+		probXrep1[0]=1;
+	}
+	else
+	{
 	  probXrep1[0]=1/(1+exp(log(pXcYrep1[0][0])-log(pXcYrep1[1][0])));//posterior distribution of P(X_1=1)
+	}
 	  sumprobXrep1[0]=sumprobXrep1[0]+probXrep1[0];
 	  U=runif(0,1);      
 	  if(U<probXrep1[0])
 	    {
 	      stateXrep1[0]=1;
-	      nrep11=nrep11++;//To get sum_s I(X_s=1)
+	      nrep11++;//To get sum_s I(X_s=1)
 	    }
 	  else
 	    {
 	      stateXrep1[0]=0;
-	      nrep10=nrep10++;
+	      nrep10++;
 	    }
 	  for (s=1; s<S-1; s++)
 	    {
@@ -968,18 +992,33 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 		}
 	      pXcYrep1[0][s]=pXcYrep1[0][s]*Q[stateXrep1[s-1]][0]*Q[0][stateXrep1[s+1]];
 	      pXcYrep1[1][s]=pXcYrep1[1][s]*Q[stateXrep1[s-1]][1]*Q[1][stateXrep1[s+1]];
+		if ((pXcYrep1[0][s]<=0)&&(pXcYrep1[1][s]<=0)&&(sumrep1Y[s]>cp*nsr1))
+	{ 
+		probXrep1[s]=1;
+	}
+	else if (pXcYrep1[1][s]<=0)
+	{
+		probXrep1[s]=0;
+	}
+	else if (pXcYrep1[0][s]<=0)
+	{
+		probXrep1[s]=1;
+	}
+	else
+	{
 	      probXrep1[s]=1/(1+exp(log(pXcYrep1[0][s])-log(pXcYrep1[1][s])));//posterior distribution of P(X_1=1)
+	}
 	      sumprobXrep1[s]=sumprobXrep1[s]+probXrep1[s];
 	      U=runif(0,1);
 	      if(U<probXrep1[s])
 		{
 		  stateXrep1[s]=1;
-		  nrep11=nrep11++;//To get sum_s I(X_s=1)
+		  nrep11++;//To get sum_s I(X_s=1)
 		}     
 	      else
 		{
 		  stateXrep1[s]=0; 
-		  nrep10=nrep10++;
+		  nrep10++;
 		}
 	     
 	    }
@@ -992,18 +1031,33 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 	    }
 	  pXcYrep1[0][S-1]=pXcYrep1[0][S-1]*Q[stateXrep1[S-2]][0];
 	  pXcYrep1[1][S-1]=pXcYrep1[1][S-1]*Q[stateXrep1[S-2]][1];
+	  if ((pXcYrep1[0][S-1]<=0)&&(pXcYrep1[1][S-1]<=0)&&(sumrep1Y[S-1]>cp*nsr1))
+	{ 
+		probXrep1[S-1]=1;
+	}
+	else if (pXcYrep1[1][S-1]<=0)
+	{
+		probXrep1[S-1]=0;
+	}
+	else if (pXcYrep1[0][S-1]<=0)
+	{
+		probXrep1[S-1]=1;
+	}
+	else
+	{
 	  probXrep1[S-1]=1/(1+exp(log(pXcYrep1[0][S-1])-log(pXcYrep1[1][S-1])));//posterior distribution of P(X_1=1)
+	}
 	  sumprobXrep1[S-1]=sumprobXrep1[S-1]+probXrep1[S-1];
 	  U=runif(0,1);
 	  if(U<probXrep1[S-1])
 	    {
 	      stateXrep1[S-1]=1;
-	      nrep11=nrep11++;//To get sum_s I(X_s=1)
+	      nrep11++;//To get sum_s I(X_s=1)
 	    }     
 	  else
 	    {	  
 	      stateXrep1[S-1]=0;
-	      nrep10=nrep10++;
+	      nrep10++;
 	    }
       
 	  // 1.2 given stateX we sample stateZ
@@ -1030,7 +1084,7 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 			{
 			  stateZ1[j*S+s]=1;
 			  sumZrep1[j]=sumZrep1[j]+dataset1[j*S+s];
-			  nZrep11[j]=nZrep11[j]++;
+			  nZrep11[j]++;
 			}
 		      else
 			{
@@ -1039,12 +1093,12 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 			    {
 			      stateZ1[j*S+s]=1;
 			      sumZrep1[j]=sumZrep1[j]+dataset1[j*S+s]; //To get sum_s Y_sI(X_s=0, Z_s=1)
-			      nZrep11[j]=nZrep11[j]++;//To get sum_s I(X_s=0, Z_s=1)
+			      nZrep11[j]++;//To get sum_s I(X_s=0, Z_s=1)
 			    }
 			  else
 			    {
 			      stateZ1[j*S+s]=0;
-			      nZrep10[j]=nZrep10[j]++;//To get sum_s I(X_s=0, Z_s=0)
+			      nZrep10[j]++;//To get sum_s I(X_s=0, Z_s=0)
 			    }
 			}
 		    }
@@ -1141,7 +1195,7 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 		  sumgammaphi1=0;
 		  for (s=0;s<S;s++)
 		    {
-		      if (stateXrep1[s]==1&dataset1[j*S+s]>0)
+		      if ((stateXrep1[s]==1)&(dataset1[j*S+s]>0))
 			{
 			  for (j2=0;j2<dataset1[j*S+s];j2++)
 			    {
@@ -1224,14 +1278,14 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 		  sumgammaphi1=0;
 		  for (s=0;s<S;s++)
 		    {
-		      if (stateXrep1[s]==0&stateZ1[j*S+s]==1&dataset1[j*S+s]>0)
+		      if ((stateXrep1[s]==0)&(stateZ1[j*S+s]==1)&(dataset1[j*S+s]>0))
 			{
 			  for (j2=0;j2<dataset1[j*S+s];j2++)
 			    {
 			      sumgammaphi0=sumgammaphi0+log(propphi0+j2)-log(phi1[j*I+0]+j2);
 			    }
 			}
-		      if (stateXrep1[s]==1&dataset1[j*S+s]>0)
+		      if ((stateXrep1[s]==1)&(dataset1[j*S+s]>0))
 			{
 			  for (j2=0;j2<dataset1[j*S+s];j2++)
 			    {
@@ -1324,18 +1378,33 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 	    }
 	  pXcYrep2[0][0]=pXcYrep2[0][0]*Q[0][stateXrep2[1]];
 	  pXcYrep2[1][0]=pXcYrep2[1][0]*Q[1][stateXrep2[1]];
+	  if ((pXcYrep2[0][0]<=0)&&(pXcYrep2[1][0]<=0)&&(sumrep2Y[0]>cp*nsr2))
+	{ 
+		probXrep2[0]=1;
+	}
+	else if (pXcYrep2[1][0]<=0)
+	{
+		probXrep2[0]=0;
+	}
+	else if (pXcYrep2[0][0]<=0)
+	{
+		probXrep2[0]=1;
+	}
+	else
+	{
 	  probXrep2[0]=1/(1+exp(log(pXcYrep2[0][0])-log(pXcYrep2[1][0])));//posterior distribution of P(X_1=1)
+	}
 	  sumprobXrep2[0]=sumprobXrep2[0]+probXrep2[0];
 	  U=runif(0,1);      
 	  if(U<probXrep2[0])
 	    {
 	      stateXrep2[0]=1;
-	      nrep21=nrep21++;//To get sum_s I(X_s=1)
+	      nrep21++;//To get sum_s I(X_s=1)
 	    }
 	  else
 	    {
 	      stateXrep2[0]=0;
-	      nrep20=nrep20++;
+	      nrep20++;
 	    }
 	  for (s=1; s<S-1; s++)
 	    {
@@ -1348,18 +1417,33 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 		}
 	      pXcYrep2[0][s]=pXcYrep2[0][s]*Q[stateXrep2[s-1]][0]*Q[0][stateXrep2[s+1]];
 	      pXcYrep2[1][s]=pXcYrep2[1][s]*Q[stateXrep2[s-1]][1]*Q[1][stateXrep2[s+1]];
+		 if ((pXcYrep2[0][s]<=0)&&(pXcYrep2[1][s]<=0)&&(sumrep2Y[s]>cp*nsr2))
+	{ 
+		probXrep2[s]=1;
+	}
+	else if (pXcYrep2[1][s]<=0)
+	{
+		probXrep2[s]=0;
+	}
+	else if (pXcYrep2[0][s]<=0)
+	{
+		probXrep2[s]=1;
+	}
+	else
+	{
 	      probXrep2[s]=1/(1+exp(log(pXcYrep2[0][s])-log(pXcYrep2[1][s])));//posterior distribution of P(X_1=1)
+	}
 	      sumprobXrep2[s]=sumprobXrep2[s]+probXrep2[s];
 	      U=runif(0,1);
 	      if(U<probXrep2[s])
 		{
 		  stateXrep2[s]=1;
-		  nrep21=nrep21++;//To get sum_s I(X_s=1)
+		  nrep21++;//To get sum_s I(X_s=1)
 		}     
 	      else
 		{
 		  stateXrep2[s]=0; 
-		  nrep20=nrep20++;
+		  nrep20++;
 		}
 	      
 	    }
@@ -1372,18 +1456,33 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 	    }
 	  pXcYrep2[0][S-1]=pXcYrep2[0][S-1]*Q[stateXrep2[S-2]][0];
 	  pXcYrep2[1][S-1]=pXcYrep2[1][S-1]*Q[stateXrep2[S-2]][1];
+	   if ((pXcYrep2[0][S-1]<=0)&&(pXcYrep2[1][S-1]<=0)&&(sumrep2Y[S-1]>cp*nsr2))
+	{ 
+		probXrep2[S-1]=1;
+	}
+	else if (pXcYrep2[1][S-1]<=0)
+	{
+		probXrep2[S-1]=0;
+	}
+	else if (pXcYrep2[0][S-1]<=0)
+	{
+		probXrep2[S-1]=1;
+	}
+	else
+	{
 	  probXrep2[S-1]=1/(1+exp(log(pXcYrep2[0][S-1])-log(pXcYrep2[1][S-1])));//posterior distribution of P(X_1=1)
+	}
 	  sumprobXrep2[S-1]=sumprobXrep2[S-1]+probXrep2[S-1];
 	  U=runif(0,1);
 	  if(U<probXrep2[S-1])
 	    {
 	      stateXrep2[S-1]=1;
-	      nrep21=nrep21++;//To get sum_s I(X_s=1)
+	      nrep21++;//To get sum_s I(X_s=1)
 	    }     
 	  else
 	    {	  
 	      stateXrep2[S-1]=0;
-	      nrep20=nrep20++;
+	      nrep20++;
 	    }
 	  
 	  // 1.2 given stateX we sample stateZ
@@ -1410,7 +1509,7 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 			{
 			  stateZ2[j*S+s]=1;
 			  sumZrep2[j]=sumZrep2[j]+dataset2[j*S+s];
-			  nZrep21[j]=nZrep21[j]++;
+			  nZrep21[j]++;
 			}
 		      else
 			{
@@ -1419,12 +1518,12 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 			    {
 			      stateZ2[j*S+s]=1;
 			      sumZrep2[j]=sumZrep2[j]+dataset2[j*S+s]; //To get sum_s Y_sI(X_s=0, Z_s=1)
-			      nZrep21[j]=nZrep21[j]++;//To get sum_s I(X_s=0, Z_s=1)
+			      nZrep21[j]++;//To get sum_s I(X_s=0, Z_s=1)
 			    }
 			  else
 			    {
 			      stateZ2[j*S+s]=0;
-			      nZrep20[j]=nZrep20[j]++;//To get sum_s I(X_s=0, Z_s=0)
+			      nZrep20[j]++;//To get sum_s I(X_s=0, Z_s=0)
 			    }
 			}
 		    }
@@ -1522,7 +1621,7 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 		  sumgammaphi1=0;
 		  for (s=0;s<S;s++)
 		    {
-		      if (stateXrep2[s]==1&dataset2[j*S+s]>0)
+		      if ((stateXrep2[s]==1)&(dataset2[j*S+s]>0))
 			{
 			  for (j2=0;j2<dataset2[j*S+s];j2++)
 			    {
@@ -1605,14 +1704,14 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 		  sumgammaphi1=0;
 		  for (s=0;s<S;s++)
 		    {
-		      if (stateXrep2[s]==0&stateZ2[j*S+s]==1&dataset2[j*S+s]>0)
+		      if ((stateXrep2[s]==0)&(stateZ2[j*S+s]==1)&(dataset2[j*S+s]>0))
 			{
 			  for (j2=0;j2<dataset2[j*S+s];j2++)
 			    {
 			      sumgammaphi0=sumgammaphi0+log(propphi0+j2)-log(phi2[j*I+0]+j2);
 			    }
 			}
-		      if (stateXrep2[s]==1&dataset2[j*S+s]>0)
+		      if ((stateXrep2[s]==1)&(dataset2[j*S+s]>0))
 			{
 			  for (j2=0;j2<dataset2[j*S+s];j2++)
 			    {
@@ -1703,51 +1802,96 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 		}
 	      pXcYnrep1[0][i1*S+0]=((1-pi1[j])*indexY1[j*S+0]+pi1[j]*indexY1[j*S+0]*pY1[0][j*S+0]+(1-indexY1[j*S+0])*pY1[0][j*S+0])*Q[0][stateXnrep1[i1*S+1]];
 	      pXcYnrep1[1][i1*S+0]=pY1[1][j*S+0]*Q[1][stateXnrep1[i1*S+1]];
+		if ((pXcYnrep1[0][i1*S+0]<=0)&&(pXcYnrep1[1][i1*S+0]<=0)&&(dataset1[j*S+0]>cp))
+	{ 
+		probXnrep1[i1*S+0]=1;
+	}
+	else if (pXcYnrep1[1][i1*S+0]<=0)
+	{
+		probXnrep1[i1*S+0]=0;
+	}
+	else if (pXcYnrep1[0][i1*S+0]<=0)
+	{
+		probXnrep1[i1*S+0]=1;
+	}
+	else
+	{
 	      probXnrep1[i1*S+0]=1/(1+exp(log(pXcYnrep1[0][i1*S+0])-log(pXcYnrep1[1][i1*S+0])));//posterior distribution of P(X_1=1)
+	}
 	      sumprobXnrep1[i1*S+0]=sumprobXnrep1[i1*S+0]+probXnrep1[i1*S+0];
 	      U=runif(0,1);      
 	      if(U<probXnrep1[i1*S+0])
 		{
 		  stateXnrep1[i1*S+0]=1;
-		  nnrep11[i1]=nnrep11[i1]++;//To get sum_s I(X_s=1)
+		  nnrep11[i1]++;//To get sum_s I(X_s=1)
 		}
 	      else
 		{
 		  stateXnrep1[i1*S+0]=0;
-		  nnrep10[i1]=nnrep10[i1]++;
+		  nnrep10[i1]++;
 		}
 	      for (s=1; s<S-1; s++)
 		{
 		  pXcYnrep1[0][i1*S+s]=((1-pi1[j])*indexY1[j*S+s]+pi1[j]*indexY1[j*S+s]*pY1[0][j*S+s]+(1-indexY1[j*S+s])*pY1[0][j*S+s])*Q[stateXnrep1[i1*S+s-1]][0]*Q[0][stateXnrep1[i1*S+s+1]];
 		  pXcYnrep1[1][i1*S+s]=pY1[1][j*S+s]*Q[stateXnrep1[i1*S+s-1]][1]*Q[1][stateXnrep1[i1*S+s+1]];
+		  if ((pXcYnrep1[0][i1*S+s]<=0)&&(pXcYnrep1[1][i1*S+s]<=0)&&(dataset1[j*S+s]>cp))
+	{ 
+		probXnrep1[i1*S+s]=1;
+	}
+	else if (pXcYnrep1[1][i1*S+s]<=0)
+	{
+		probXnrep1[i1*S+s]=0;
+	}
+	else if (pXcYnrep1[0][i1*S+s]<=0)
+	{
+		probXnrep1[i1*S+s]=1;
+	}
+	else
+	{
 		  probXnrep1[i1*S+s]=1/(1+exp(log(pXcYnrep1[0][i1*S+s])-log(pXcYnrep1[1][i1*S+s])));//posterior distribution of P(X_1=1)
+	}
 		  sumprobXnrep1[i1*S+s]=sumprobXnrep1[i1*S+s]+probXnrep1[i1*S+s];
 		  U=runif(0,1);
 		  if(U<probXnrep1[i1*S+s])
 		    {
 		      stateXnrep1[i1*S+s]=1;
-		      nnrep11[i1]=nnrep11[i1]++;//To get sum_s I(X_s=1)
+		      nnrep11[i1]++;//To get sum_s I(X_s=1)
 		    }     
 		  else
 		    {
 		      stateXnrep1[i1*S+s]=0; 
-		      nnrep10[i1]=nnrep10[i1]++;
+		      nnrep10[i1]++;
 		    }
 		}
 	      pXcYnrep1[0][i1*S+S-1]=((1-pi1[j])*indexY1[j*S+S-1]+pi1[j]*indexY1[j*S+S-1]*pY1[0][j*S+S-1]+(1-indexY1[j*S+S-1])*pY1[0][j*S+S-1])*Q[stateXnrep1[i1*S+S-2]][0];
 	      pXcYnrep1[1][i1*S+S-1]=pY1[1][j*S+S-1]*Q[stateXnrep1[i1*S+S-2]][1];
 	      probXnrep1[i1*S+S-1]=1/(1+exp(log(pXcYnrep1[0][i1*S+S-1])-log(pXcYnrep1[1][i1*S+S-1])));//posterior distribution of P(X_1=1)
+		if ((pXcYnrep1[0][i1*S+S-1]<=0)&&(pXcYnrep1[1][i1*S+S-1]<=0)&&(dataset1[j*S+S-1]>cp))
+	{ 
+		probXnrep1[i1*S+S-1]=1;
+	}
+	else if (pXcYnrep1[1][i1*S+S-1]<=0)
+	{
+		probXnrep1[i1*S+S-1]=0;
+	}
+	else if (pXcYnrep1[0][i1*S+S-1]<=0)
+	{
+		probXnrep1[i1*S+S-1]=1;
+	}
+	else
+	{
 	      sumprobXnrep1[i1*S+S-1]=sumprobXnrep1[i1*S+S-1]+probXnrep1[i1*S+S-1];
+	}
 	      U=runif(0,1);
 	      if(U<probXnrep1[i1*S+S-1])
 		{
 		  stateXnrep1[i1*S+S-1]=1;
-		  nnrep11[i1]=nnrep11[i1]++;//To get sum_s I(X_s=1)
+		  nnrep11[i1]++;//To get sum_s I(X_s=1)
 		}     
 	      else
 		{	  
 		  stateXnrep1[i1*S+S-1]=0;
-		  nnrep10[i1]=nnrep10[i1]++;
+		  nnrep10[i1]++;
 		}
       
 	      // 1.2 given stateX we sample stateZ
@@ -1768,7 +1912,7 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 			{
 			  stateZ1[j*S+s]=1;
 			  sumZnrep1[i1]=sumZnrep1[i1]+dataset1[j*S+s];
-			  nZnrep11[i1]=nZnrep11[i1]++;
+			  nZnrep11[i1]++;
 			}
 		      else
 			{
@@ -1777,12 +1921,12 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 			    {
 			      stateZ1[j*S+s]=1;
 			      sumZnrep1[i1]=sumZnrep1[i1]+dataset1[j*S+s]; //To get sum_s Y_sI(X_s=0, Z_s=1)
-			      nZnrep11[i1]=nZnrep11[i1]++;//To get sum_s I(X_s=0, Z_s=1)
+			      nZnrep11[i1]++;//To get sum_s I(X_s=0, Z_s=1)
 			    }
 			  else
 			    {
 			      stateZ1[j*S+s]=0;
-			      nZnrep10[i1]=nZnrep10[i1]++;//To get sum_s I(X_s=0, Z_s=0)
+			      nZnrep10[i1]++;//To get sum_s I(X_s=0, Z_s=0)
 			    }
 			}
 		    }
@@ -1818,7 +1962,7 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 	      
 	      // 2.1.2 sample transition probability q_0, and later sample the common protion c. We sample q_0 by Metropolis-Hasting method
 	      U1=runif(0,1);
-	      temp==U1*(pnorm((1-qnrep1[i1*I+0])/sdq0nrep1[i1], 0, 1, 1, 0)-pnorm(-qnrep1[i1*I+0]/sdq0nrep1[i1], 0, 1, 1, 0))+pnorm(-qnrep1[i1*I+0]/sdq0nrep1[i1], 0, 1, 1, 0);//U1*pnorm(qnrep1[i1*I+0]/sdq0nrep1[i1], 0, 1, 1, 0)+pnorm(-qnrep1[i1*I+0]/sdq0nrep1[i1], 0, 1, 1, 0);
+	      temp=U1*(pnorm((1-qnrep1[i1*I+0])/sdq0nrep1[i1], 0, 1, 1, 0)-pnorm(-qnrep1[i1*I+0]/sdq0nrep1[i1], 0, 1, 1, 0))+pnorm(-qnrep1[i1*I+0]/sdq0nrep1[i1], 0, 1, 1, 0);//U1*pnorm(qnrep1[i1*I+0]/sdq0nrep1[i1], 0, 1, 1, 0)+pnorm(-qnrep1[i1*I+0]/sdq0nrep1[i1], 0, 1, 1, 0);
 	      propq0=qnorm(temp, 0, 1, 1, 0)*sdq0nrep1[i1]+qnrep1[i1*I+0];		       
 	      // 2.1.2. Calculate the acceptance ratio for q0
 	      Cq0=log(pnorm((1-qnrep1[i1*I+0])/sdq0nrep1[i1], 0, 1, 1, 0)-pnorm(-qnrep1[i1*I+0]/sdq0nrep1[i1],0,1,1,0))-log(pnorm((1-propq0)/sdq0nrep1[i1], 0, 1, 1, 0)-pnorm(-propq0/sdq0nrep1[i1],0,1,1,0));//pnorm(qnrep1[i1*I+0]/sdq0nrep1[i1],0,1,1,1)-pnorm(propq0/sdq0nrep1[i1],0,1,1,1);// log(PHI(mu^t/sd_mu))-log(PHI(mu'/sd_mu))##using R function pnorm(x, mu, phi, lowtailistrue=1, logistrue=1)      
@@ -1873,7 +2017,7 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 		  sumgammaphi1=0;
 		  for (s=0;s<S;s++)
 		    {
-		      if (stateXnrep1[i1*S+s]==1&dataset1[j*S+s]>0)
+		      if ((stateXnrep1[i1*S+s]==1)&(dataset1[j*S+s]>0))
 			{
 			  for (j2=0;j2<dataset1[j*S+s];j2++)
 			    {
@@ -1956,14 +2100,14 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 		  sumgammaphi1=0;
 		  for (s=0;s<S;s++)
 		    {
-		      if (stateXnrep1[i1*S+s]==0&stateZ1[j*S+s]==1&dataset1[j*S+s]>0)
+		      if ((stateXnrep1[i1*S+s]==0)&(stateZ1[j*S+s]==1)&(dataset1[j*S+s]>0))
 			{
 			  for (j2=0;j2<dataset1[j*S+s];j2++)
 			    {
 			      sumgammaphi0=sumgammaphi0+log(propphi0+j2)-log(phi1[j*I+0]+j2);
 			    }
 			}
-		      if (stateXnrep1[i1*S+s]==1&dataset1[j*S+s]>0)
+		      if ((stateXnrep1[i1*S+s]==1)&(dataset1[j*S+s]>0))
 			{
 			  for (j2=0;j2<dataset1[j*S+s];j2++)
 			    {
@@ -2051,51 +2195,96 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 		}
 	      pXcYnrep2[0][i2*S+0]=((1-pi2[j])*indexY2[j*S+0]+pi2[j]*indexY2[j*S+0]*pY2[0][j*S+0]+(1-indexY2[j*S+0])*pY2[0][j*S+0])*Q[0][stateXnrep2[i2*S+1]];
 	      pXcYnrep2[1][i2*S+0]=pY2[1][j*S+0]*Q[1][stateXnrep2[i2*S+1]];
+		if ((pXcYnrep2[0][i2*S+0]<=0)&&(pXcYnrep2[1][i2*S+0]<=0)&&(dataset2[j*S+0]>cp))
+	{ 
+		probXnrep2[i2*S+0]=1;
+	}
+	else if (pXcYnrep2[1][i2*S+0]<=0)
+	{
+		probXnrep2[i2*S+0]=0;
+	}
+	else if (pXcYnrep2[0][i2*S+0]<=0)
+	{
+		probXnrep2[i2*S+0]=1;
+	}
+	else
+	{
 	      probXnrep2[i2*S+0]=1/(1+exp(log(pXcYnrep2[0][i2*S+0])-log(pXcYnrep2[1][i2*S+0])));//posterior distribution of P(X_1=1)
+	}
 	      sumprobXnrep2[i2*S+0]=sumprobXnrep2[i2*S+0]+probXnrep2[i2*S+0];
 	      U=runif(0,1);      
 	      if(U<probXnrep2[i2*S+0])
 		{
 		  stateXnrep2[i2*S+0]=1;
-		  nnrep21[i2]=nnrep21[i2]++;//To get sum_s I(X_s=1)
+		  nnrep21[i2]++;//To get sum_s I(X_s=1)
 		}
 	      else
 		{
 		  stateXnrep2[i2*S+0]=0;
-		  nnrep20[i2]=nnrep20[i2]++;
+		  nnrep20[i2]++;
 		}
 	      for (s=1; s<S-1; s++)
 		{
 		  pXcYnrep2[0][i2*S+s]=((1-pi2[j])*indexY2[j*S+s]+pi2[j]*indexY2[j*S+s]*pY2[0][j*S+s]+(1-indexY2[j*S+s])*pY2[0][j*S+s])*Q[stateXnrep2[i2*S+s-1]][0]*Q[0][stateXnrep2[i2*S+s+1]];
 		  pXcYnrep2[1][i2*S+s]=pY2[1][j*S+s]*Q[stateXnrep2[i2*S+s-1]][1]*Q[1][stateXnrep2[i2*S+s+1]];
+		  if ((pXcYnrep2[0][i2*S+s]<=0)&&(pXcYnrep2[1][i2*S+s]<=0)&&(dataset2[j*S+s]>cp))
+	{ 
+		probXnrep2[i2*S+s]=1;
+	}
+	else if (pXcYnrep2[1][i2*S+s]<=0)
+	{
+		probXnrep2[i2*S+s]=0;
+	}
+	else if (pXcYnrep2[0][i2*S+s]<=0)
+	{
+		probXnrep2[i2*S+s]=1;
+	}
+	else
+	{
 		  probXnrep2[i2*S+s]=1/(1+exp(log(pXcYnrep2[0][i2*S+s])-log(pXcYnrep2[1][i2*S+s])));//posterior distribution of P(X_1=1)
+	}
 		  sumprobXnrep2[i2*S+s]=sumprobXnrep2[i2*S+s]+probXnrep2[i2*S+s];
 		  U=runif(0,1);
 		  if(U<probXnrep2[i2*S+s])
 		    {
 		      stateXnrep2[i2*S+s]=1;
-		      nnrep21[i2]=nnrep21[i2]++;//To get sum_s I(X_s=1)
+		      nnrep21[i2]++;//To get sum_s I(X_s=1)
 		    }     
 		  else
 		    {
 		      stateXnrep2[i2*S+s]=0; 
-		      nnrep20[i2]=nnrep20[i2]++;
+		      nnrep20[i2]++;
 		    }
 		}
 	      pXcYnrep2[0][i2*S+S-1]=((1-pi2[j])*indexY2[j*S+S-1]+pi2[j]*indexY2[j*S+S-1]*pY2[0][j*S+S-1]+(1-indexY2[j*S+S-1])*pY2[0][j*S+S-1])*Q[stateXnrep2[i2*S+S-2]][0];
 	      pXcYnrep2[1][i2*S+S-1]=pY2[1][j*S+S-1]*Q[stateXnrep2[i2*S+S-2]][1];
-	      probXnrep2[i2*S+S-1]=1/(1+exp(log(pXcYnrep2[0][i2*S+S-1])-log(pXcYnrep2[1][i2*S+S-1])));//posterior distribution of P(X_1=1)
+	      if ((pXcYnrep2[0][i2*S+S-1]<=0)&&(pXcYnrep2[1][i2*S+S-1]<=0)&&(dataset2[j*S+S-1]>cp))
+	{ 
+		probXnrep2[i2*S+S-1]=1;
+	}
+	else if (pXcYnrep2[1][i2*S+S-1]<=0)
+	{
+		probXnrep2[i2*S+S-1]=0;
+	}
+	else if (pXcYnrep2[0][i2*S+S-1]<=0)
+	{
+		probXnrep2[i2*S+S-1]=1;
+	}
+	else
+	{
+		 probXnrep2[i2*S+S-1]=1/(1+exp(log(pXcYnrep2[0][i2*S+S-1])-log(pXcYnrep2[1][i2*S+S-1])));//posterior distribution of P(X_1=1)
+	}
 	      sumprobXnrep2[i2*S+S-1]=sumprobXnrep2[i2*S+S-1]+probXnrep2[i2*S+S-1];
 	      U=runif(0,1);
 	      if(U<probXnrep2[i2*S+S-1])
 		{
 		  stateXnrep2[i2*S+S-1]=1;
-		  nnrep21[i2]=nnrep21[i2]++;//To get sum_s I(X_s=1)
+		  nnrep21[i2]++;//To get sum_s I(X_s=1)
 		}     
 	      else
 		{	  
 		  stateXnrep2[i2*S+S-1]=0;
-		  nnrep20[i2]=nnrep20[i2]++;
+		  nnrep20[i2]++;
 		}
 	      
 	      // 1.2 given stateX we sample stateZ
@@ -2116,7 +2305,7 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 			{
 			  stateZ2[j*S+s]=1;
 			  sumZnrep2[i2]=sumZnrep2[i2]+dataset2[j*S+s];
-			  nZnrep21[i2]=nZnrep21[i2]++;
+			  nZnrep21[i2]++;
 			}
 		      else
 			{
@@ -2125,12 +2314,12 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 			    {
 			      stateZ2[j*S+s]=1;
 			      sumZnrep2[i2]=sumZnrep2[i2]+dataset2[j*S+s]; //To get sum_s Y_sI(X_s=0, Z_s=1)
-			      nZnrep21[i2]=nZnrep21[i2]++;//To get sum_s I(X_s=0, Z_s=1)
+			      nZnrep21[i2]++;//To get sum_s I(X_s=0, Z_s=1)
 			    }
 			  else
 			    {
 			      stateZ2[j*S+s]=0;
-			      nZnrep20[i2]=nZnrep20[i2]++;//To get sum_s I(X_s=0, Z_s=0)
+			      nZnrep20[i2]++;//To get sum_s I(X_s=0, Z_s=0)
 			    }
 			}
 		    }
@@ -2223,7 +2412,7 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 		  sumgammaphi1=0;
 		  for (s=0;s<S;s++)
 		    {
-		      if (stateXnrep2[i2*S+s]==1&dataset2[j*S+s]>0)
+		      if ((stateXnrep2[i2*S+s]==1)&(dataset2[j*S+s]>0))
 			{
 			  for (j2=0;j2<dataset2[j*S+s];j2++)
 			    {
@@ -2303,14 +2492,14 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 		  sumgammaphi1=0;
 		  for (s=0;s<S;s++)
 		    {
-		      if (stateXnrep2[i2*S+s]==0&stateZ2[j*S+s]==1&dataset2[j*S+s]>0)
+		      if ((stateXnrep2[i2*S+s]==0)&(stateZ2[j*S+s]==1)&(dataset2[j*S+s]>0))
 			{
 			  for (j2=0;j2<dataset2[j*S+s];j2++)
 			    {
 			      sumgammaphi0=sumgammaphi0+log(propphi0+j2)-log(phi2[j*I+0]+j2);
 			    }
 			}
-		      if (stateXnrep2[i2*S+s]==1&dataset2[j*S+s]>0)
+		      if ((stateXnrep2[i2*S+s]==1)&(dataset2[j*S+s]>0))
 			{
 			  for (j2=0;j2<dataset2[j*S+s];j2++)
 			    {
@@ -2457,7 +2646,7 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 	    }
 	}
       
-      if (z>=bN&z==j1*10+bN)
+      if ((z>=bN)&(z==j1*10+bN))
 	{
 	  for (j=0;j<nr1;j++)
 	    {
@@ -2494,7 +2683,7 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
 	}
       //if (z==j1*1000)
       //	{
-      //j1=j1++;
+      //j1++;
       /*
           Rprintf("MCMC step= %d \n", z+1);
 	  for (j=0;j<nr1;j++)

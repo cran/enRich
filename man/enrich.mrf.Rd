@@ -45,7 +45,7 @@ A numeric variable. The level of FDR for identifying the differentially bound re
 \item{IPE}{A p-dimensional vector of estimated IP efficiency values for each experiment.}
 }
 \references{
-Bao et al. Joint modelling of ChIP-seq data via a Markov random field model, 2013.
+Bao et al. Joint modelling of ChIP-seq data via a Markov random field model, Biostatistics 2014, 15(2):296-310 DOI:10.1093/biostatistics/kxt047.
 }
 \author{
 Yanchun Bao and Veronica Vinciotti

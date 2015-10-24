@@ -27,7 +27,7 @@
 void MRF(int *data1, int *size, int *met, double *qprior, double *piprior, double *poisprior, double *NBprior, int *N, int *Nb, int *jumpN, double *var, double *PP, double *es_pi, double *es_q1, double *es_q0, double *es_lambda1, double *es_mu1, double *es_phi1, double *es_lambda0, double *es_mu0, double *es_phi0, double *loglikeli, double *acrate)
 {
   int S=*size;
-  int N1=*N;
+//  int N1=*N;
   int bN=*Nb;
   int jN=*jumpN;
   double AQ[I], BQ[I];  // priors of transition probabilities.
@@ -42,9 +42,17 @@ void MRF(int *data1, int *size, int *met, double *qprior, double *piprior, doubl
   int *stateZ; // inner latent variables
   stateZ=(int*)malloc(sizeof(int*)*S);
   double lambda[I], mu[I],phi[I], q[I], pi; // parameters of Poisson-Gamma mixing distribution and transition probabilities
-  int i, j, j1, j2, k, l, s, z; 
+  phi[0]=0.0;
+  phi[1]=0.0;
+  mu[0]=0.0;
+  mu[1]=0.0;
+  lambda[0]=0.0;
+  lambda[1]=0.0;
+  int i, j1, j2, s, z; 
  
-  double *probX, *sumprobX, probZ, pX1[I];
+  double *probX, *sumprobX;
+  double probZ=0.0;
+  double pX1[I];
   int *indexY;
   probX=(double*)malloc(sizeof(double*)*S);
   sumprobX=(double*)malloc(sizeof(double*)*S);
@@ -124,30 +132,30 @@ void MRF(int *data1, int *size, int *met, double *qprior, double *piprior, doubl
 	{ 
 	  stateX[s]=1;
 	  sum1=sum1+data[s];
-	  n1=n1++;
+	  n1++;
 	  stateZ[s]=2;
 	  indexY[s]=0;
 	}
       else
 	{
 	  stateX[s]=0;
-	  n0=n0++;
+	  n0++;
 	  if (data[s]==0)
 	    {
 	      indexY[s]=1;
 	      stateZ[s]=0;
-	      nZ0=nZ0++;
+	      nZ0++;
 	    }
 	  else
 	    {
 	      indexY[s]=0;
 	      stateZ[s]=1;
 	      sumZ1=sumZ1+data[s];
-	      nZ1=nZ1++;
+	      nZ1++;
 	    }
 	}
     }
-  if (sum1==0|n1==0)
+  if ((sum1==0)|(n1==0))
     {
       sum1=5;
       n1=1;
@@ -268,55 +276,100 @@ void MRF(int *data1, int *size, int *met, double *qprior, double *piprior, doubl
 	}
       pXcY[0][0]=((1-pi)*indexY[0]+pi*indexY[0]*pY[0][0]+(1-indexY[0])*pY[0][0])*Q[0][stateX[1]];
       pXcY[1][0]=pY[1][0]*Q[1][stateX[1]];
-      probX[0]=1/(1+exp(log(pXcY[0][0])-log(pXcY[1][0])));//posterior distribution of P(X_1=1)
-      sumprobX[0]=sumprobX[0]+probX[0];
+	 if ((pXcY[0][0]<=0)&&(pXcY[1][0]<=0)&&(data[0]>cp))
+	{ 
+		probX[0]=1;
+	}
+	else if (pXcY[1][0]<=0)
+	{
+		probX[0]=0;
+	}
+	else if (pXcY[0][0]<=0)
+	{
+		probX[0]=1;
+	}
+	else
+	{
+      		probX[0]=1/(1+exp(log(pXcY[0][0])-log(pXcY[1][0])));//posterior distribution of P(X_1=1)
+        }
+	 sumprobX[0]=sumprobX[0]+probX[0];
       U=runif(0,1);      
       if(U<probX[0])
 	{
 	  stateX[0]=1;
 	  sum1=sum1+data[0]; //To get sum_s Y_sI(X_s=1)
-	  n1=n1++;//To get sum_s I(X_s=1)
+	  n1++;//To get sum_s I(X_s=1)
 	}
       else
 	{
 	  stateX[0]=0;
-	  n0=n0++;
+	  n0++;
 	}
       for (s=1; s<S-1; s++)
 	{
 	  pXcY[0][s]=((1-pi)*indexY[s]+pi*indexY[s]*pY[0][s]+(1-indexY[s])*pY[0][s])*Q[stateX[s-1]][0]*Q[0][stateX[s+1]];
 	  pXcY[1][s]=pY[1][s]*Q[stateX[s-1]][1]*Q[1][stateX[s+1]];
-	  probX[s]=1/(1+exp(log(pXcY[0][s])-log(pXcY[1][s])));//posterior distribution of P(X_1=1)
+	  if ((pXcY[0][s]<=0)&&(pXcY[1][s]<=0)&&(data[s]>cp))
+	  { 
+		probX[s]=1;
+	  }
+	  else if (pXcY[1][s]<=0)
+	  {
+		probX[s]=0;
+	  }
+	  else if (pXcY[0][s]<=0)
+	  {
+		probX[s]=1;
+	  }
+	  else
+	  {
+      		probX[s]=1/(1+exp(log(pXcY[0][s])-log(pXcY[1][s])));//posterior distribution of P(X_1=1)
+	  }
 	  sumprobX[s]=sumprobX[s]+probX[s];
 	  U=runif(0,1);
 	  if(U<probX[s])
 	    {
 	      stateX[s]=1;
 	      sum1=sum1+data[s]; //To get sum_s Y_sI(X_s=1)
-	      n1=n1++;//To get sum_s I(X_s=1)
+	      n1++;//To get sum_s I(X_s=1)
 	    }     
 	  else
 	    {
 	      stateX[s]=0; 
-	      n0=n0++;
+	      n0++;
 	    }
 	     
 	}
       pXcY[0][S-1]=((1-pi)*indexY[S-1]+pi*indexY[S-1]*pY[0][S-1]+(1-indexY[S-1])*pY[0][S-1])*Q[stateX[S-2]][0];
       pXcY[1][S-1]=pY[1][S-1]*Q[stateX[S-2]][1];
-      probX[S-1]=1/(1+exp(log(pXcY[0][S-1])-log(pXcY[1][S-1])));//posterior distribution of P(X_1=1)
+      if ((pXcY[0][S-1]<=0)&&(pXcY[1][S-1]<=0)&&(data[S-1]>cp))
+	{ 
+		probX[S-1]=1;
+	}
+	else if (pXcY[1][S-1]<=0)
+	{
+		probX[S-1]=0;
+	}
+	else if (pXcY[0][S-1]<=0)
+	{
+		probX[S-1]=1;
+	}
+	else
+	{
+      	probX[S-1]=1/(1+exp(log(pXcY[0][S-1])-log(pXcY[1][S-1])));//posterior distribution of P(X_1=1)
+	}
       sumprobX[S-1]=sumprobX[S-1]+probX[S-1];
       U=runif(0,1);
       if(U<probX[S-1])
 	{
 	  stateX[S-1]=1;
 	  sum1=sum1+data[S-1]; //To get sum_s Y_sI(X_s=1)
-	  n1=n1++;//To get sum_s I(X_s=1)
+	  n1++;//To get sum_s I(X_s=1)
 	}     
       else
 	{	  
 	  stateX[S-1]=0;
-	  n0=n0++;
+	  n0++;
 	}
       // 1.2 given stateX sample stateZ
       if (*met<2)
@@ -336,7 +389,7 @@ void MRF(int *data1, int *size, int *met, double *qprior, double *piprior, doubl
 		{
 		  stateZ[s]=1;
 		  sumZ1=sumZ1+data[s];
-		  nZ1=nZ1++;
+		  nZ1++;
 		}
 	      else
 		{
@@ -345,12 +398,12 @@ void MRF(int *data1, int *size, int *met, double *qprior, double *piprior, doubl
 		    {
 		      stateZ[s]=1;
 		      sumZ1=sumZ1+data[s]; //To get sum_s Y_sI(X_s=0, Z_s=1)
-		      nZ1=nZ1++;//To get sum_s I(X_s=0, Z_s=1)
+		      nZ1++;//To get sum_s I(X_s=0, Z_s=1)
 		    }
 		  else
 		    {
 		      stateZ[s]=0;
-		      nZ0=nZ0++;//To get sum_s I(X_s=0, Z_s=0)
+		      nZ0++;//To get sum_s I(X_s=0, Z_s=0)
 		    }
 		}
 	    }
@@ -466,13 +519,13 @@ void MRF(int *data1, int *size, int *met, double *qprior, double *piprior, doubl
 	  sumgammaphi1=0;
 	  for (s=0;s<S;s++)
 	    {
-	      if (stateX[s]==1&data[s]>0)
-		{
-		  for (j2=0;j2<data[s];j2++)
+	      if ((stateX[s]==1)&(data[s]>0))
 		    {
-		      sumgammaphi1=sumgammaphi1+log(propphi1+j2)-log(phi[1]+j2);
+		       for (j2=0;j2<data[s];j2++)
+		      {
+		        sumgammaphi1=sumgammaphi1+log(propphi1+j2)-log(phi[1]+j2);
+		      }
 		    }
-		}
 	    }
 	  logAphi1=sumgammaphi1+sum1*(log(mu[1]+phi[1])-log(mu[1]+propphi1))+n1*(propphi1*log(propphi1/(mu[1]+propphi1))-phi[1]*log(phi[1]/(mu[1]+phi[1])))+(Aphi[1]-1.0)*log(propphi1/phi[1])-Bphi[1]*(propphi1-phi[1])+Cphi1;
 	  U=runif(0,1);
@@ -592,22 +645,22 @@ void MRF(int *data1, int *size, int *met, double *qprior, double *piprior, doubl
 	      //{
 	  	  //sumgammaphi1=sumgammaphi1+lgammafn(data[s]+propphi1)+lgammafn(phi[1])-lgammafn(data[s]+phi[1])-lgammafn(propphi1);
 	      //}
-	      if (stateX[s]==0&stateZ[s]==1&data[s]>0)
-		{
-		  for (j2=0;j2<data[s];j2++)
+	      if ((stateX[s]==0)&(stateZ[s]==1)&(data[s]>0))
 		    {
-		      sumgammaphi0=sumgammaphi0+log(propphi0+j2)-log(phi[0]+j2);
+		      for (j2=0;j2<data[s];j2++)
+		      {
+		        sumgammaphi0=sumgammaphi0+log(propphi0+j2)-log(phi[0]+j2);
 		      //tempsum0=tempsum0+log(propphi0+j2)-log(phi[0]+j2);
+		      }
 		    }
-		}
-	      if (stateX[s]==1&data[s]>0)
-		{
-		  for (j2=0;j2<data[s];j2++)
+	      if ((stateX[s]==1)&(data[s]>0))
 		    {
-		      sumgammaphi1=sumgammaphi1+log(propphi1+j2)-log(phi[1]+j2);
+		      for (j2=0;j2<data[s];j2++)
+		      {
+		        sumgammaphi1=sumgammaphi1+log(propphi1+j2)-log(phi[1]+j2);
 		      //tempsum1=tempsum1+log(propphi1+j2)-log(phi[1]+j2);
-		    }
-		}		
+		      }
+		    }		
 	    }
 	  //Rprintf("sumgamma0 and tempsum0 are %lf %lf\n", sumgammaphi0, tempsum0);	  
 	  //Rprintf("sumgamma1 and tempsum1 are %lf %lf\n", sumgammaphi1, tempsum1);
@@ -652,7 +705,7 @@ void MRF(int *data1, int *size, int *met, double *qprior, double *piprior, doubl
 	}
       
       // iteration step 4. pass the results back to R
-      if (z>=bN&z==j1*10+bN)
+      if ((z>=bN)&(z==j1*10+bN))
 	{
 	  *(es_pi+j1)=pi;
 	  *(es_q0+j1)=q[0];
@@ -664,7 +717,7 @@ void MRF(int *data1, int *size, int *met, double *qprior, double *piprior, doubl
 	  *(es_mu0+j1)=mu[0];
 	  *(es_phi0+j1)=phi[0];
 	  *(loglikeli+j1)=logl;  
-	  j1=j1++;
+	  j1++;
 	  //Rprintf("%d %lf %lf %lf %lf %lf %lf %lf \n", z,q[1],q[0],mu[1],phi[1],pi,mu[0],phi[0]);
 	  //Rprintf("%d %lf %lf %lf %lf %lf \n", z,q[1],q[0],lambda[1],pi,lambda[0]);
 	}

@@ -27,7 +27,7 @@
 void MRFrep(int *data1, int *nrep, int *size, int *met, double *qprior, double *piprior, double *poisprior, double *NBprior,  int *N, int *Nb, int *jumpN, double *var, double *PP, double *es_pi, double *es_q1, double *es_q0, double *es_lambda1, double *es_mu1, double *es_phi1, double *es_lambda0, double *es_mu0, double *es_phi0, double *loglikeli, double *acrate)
 {
   int S=*size;
-  int N1=*N;
+ // int N1=*N;
   int bN=*Nb;
   int jN=*jumpN;
   int nr=*nrep;
@@ -58,7 +58,7 @@ void MRFrep(int *data1, int *nrep, int *size, int *met, double *qprior, double *
   mu=(double*)malloc(sizeof(double*)*nrI);
   phi=(double*)malloc(sizeof(double*)*nrI);
   pi=(double*)malloc(sizeof(double*)*nr);
-  int i, j, j1, j2, k, l, s, z; 
+  int i, j, j1, j2, s, z; 
  
   double *probX, *sumprobX, *probZ, pX1[I];
   int *indexY;
@@ -132,8 +132,10 @@ void MRFrep(int *data1, int *nrep, int *size, int *met, double *qprior, double *
   
   //////// give initial values, set X=1 if Y>cp, where cp is initial cutting points
   double *sumZ1, *sum1;
+  int *sumY;
   sumZ1=(double*)malloc(sizeof(double*)*nr);
   sum1=(double*)malloc(sizeof(double*)*nr);
+  sumY=(int*)malloc(sizeof(int*)*S);
   int n1,n0, *nZ1,*nZ0;
   nZ1=(int*)malloc(sizeof(int*)*nr);
   nZ0=(int*)malloc(sizeof(int*)*nr);
@@ -142,20 +144,20 @@ void MRFrep(int *data1, int *nrep, int *size, int *met, double *qprior, double *
   n0=0;
   for (s=0;s<S;s++)
     {
-      temp=0;
+      sumY[s]=0;
       for (i=0;i<nr;i++)
 	{
-	  temp=temp+data[i*S+s];
+	  sumY[s]=sumY[s]+data[i*S+s];
 	}
-      if (temp>cp*(nr-1))
+      if (sumY[s]>cp*nr)
 	{
 	  stateX[s]=1;
-	  n1=n1++;
+	  n1++;
 	}
       else
 	{
 	  stateX[s]=0;
-	  n0=n0++;
+	  n0++;
 	}
     }
   
@@ -179,18 +181,18 @@ void MRFrep(int *data1, int *nrep, int *size, int *met, double *qprior, double *
 		{
 		  indexY[i*S+s]=1;
 		  stateZ[i*S+s]=0;
-		  nZ0[i]=nZ0[i]++;
+		  nZ0[i]++;
 		}
 	      else
 		{
 		  indexY[i*S+s]=0;
 		  stateZ[i*S+s]=1;
 		  sumZ1[i]=sumZ1[i]+data[i*S+s];
-		  nZ1[i]=nZ1[i]++;
+		  nZ1[i]++;
 		}
 	    }
 	}
-      if (sum1[i]==0|n1==0)
+      if ((sum1[i]==0)|(n1==0))
 	{
 	  sum1[i]=5;
 	  n1=1;
@@ -327,18 +329,33 @@ void MRFrep(int *data1, int *nrep, int *size, int *met, double *qprior, double *
 	}
       pXcY[0][0]=pXcY[0][0]*Q[0][stateX[1]];
       pXcY[1][0]=pXcY[1][0]*Q[1][stateX[1]];
-      probX[0]=1/(1+exp(log(pXcY[0][0])-log(pXcY[1][0])));//posterior distribution of P(X_1=1)
+	 if ((pXcY[0][0]<=0)&&(pXcY[1][0]<=0)&&(sumY[0]>cp*nr))
+	{ 
+		probX[0]=1;
+	}
+	else if (pXcY[1][0]<=0)
+	{
+		probX[0]=0;
+	}
+	else if (pXcY[0][0]<=0)
+	{
+		probX[0]=1;
+	}
+	else
+	{
+      		probX[0]=1/(1+exp(log(pXcY[0][0])-log(pXcY[1][0])));//posterior distribution of P(X_1=1)
+        }
       sumprobX[0]=sumprobX[0]+probX[0];
       U=runif(0,1);      
       if(U<probX[0])
 	{
 	  stateX[0]=1;
-	  n1=n1++;//To get sum_s I(X_s=1)
+	  n1++;//To get sum_s I(X_s=1)
 	}
       else
 	{
 	  stateX[0]=0;
-	  n0=n0++;
+	  n0++;
 	}
       for (s=1; s<S-1; s++)
 	{
@@ -351,18 +368,33 @@ void MRFrep(int *data1, int *nrep, int *size, int *met, double *qprior, double *
 	    }
 	  pXcY[0][s]=pXcY[0][s]*Q[stateX[s-1]][0]*Q[0][stateX[s+1]];
 	  pXcY[1][s]=pXcY[1][s]*Q[stateX[s-1]][1]*Q[1][stateX[s+1]];
-	  probX[s]=1/(1+exp(log(pXcY[0][s])-log(pXcY[1][s])));//posterior distribution of P(X_1=1)
+	 if ((pXcY[0][s]<=0)&&(pXcY[1][s]<=0)&&(sumY[s]>cp*nr))
+	  { 
+		probX[s]=1;
+	  }
+	  else if (pXcY[1][s]<=0)
+	  {
+		probX[s]=0;
+	  }
+	  else if (pXcY[0][s]<=0)
+	  {
+		probX[s]=1;
+	  }
+	  else
+	  {
+      		probX[s]=1/(1+exp(log(pXcY[0][s])-log(pXcY[1][s])));//posterior distribution of P(X_1=1)
+	  }
 	  sumprobX[s]=sumprobX[s]+probX[s];
 	  U=runif(0,1);
 	  if(U<probX[s])
 	    {
 	      stateX[s]=1;
-	      n1=n1++;//To get sum_s I(X_s=1)
+	      n1++;//To get sum_s I(X_s=1)
 	    }     
 	  else
 	    {
 	      stateX[s]=0; 
-	      n0=n0++;
+	      n0++;
 	    }
 	     
 	}
@@ -375,18 +407,33 @@ void MRFrep(int *data1, int *nrep, int *size, int *met, double *qprior, double *
 	}
       pXcY[0][S-1]=pXcY[0][S-1]*Q[stateX[S-2]][0];
       pXcY[1][S-1]=pXcY[1][S-1]*Q[stateX[S-2]][1];
-      probX[S-1]=1/(1+exp(log(pXcY[0][S-1])-log(pXcY[1][S-1])));//posterior distribution of P(X_1=1)
+       if ((pXcY[0][S-1]<=0)&&(pXcY[1][S-1]<=0)&&(sumY[S-1]>cp*nr))
+	{ 
+		probX[S-1]=1;
+	}
+	else if (pXcY[1][S-1]<=0)
+	{
+		probX[S-1]=0;
+	}
+	else if (pXcY[0][S-1]<=0)
+	{
+		probX[S-1]=1;
+	}
+	else
+	{
+      		probX[S-1]=1/(1+exp(log(pXcY[0][S-1])-log(pXcY[1][S-1])));//posterior distribution of P(X_1=1)
+	}
       sumprobX[S-1]=sumprobX[S-1]+probX[S-1];
       U=runif(0,1);
       if(U<probX[S-1])
 	{
 	  stateX[S-1]=1;
-	  n1=n1++;//To get sum_s I(X_s=1)
+	  n1++;//To get sum_s I(X_s=1)
 	}     
       else
 	{	  
 	  stateX[S-1]=0;
-	  n0=n0++;
+	  n0++;
 	}
       
       // 1.2 given stateX we sample stateZ
@@ -413,7 +460,7 @@ void MRFrep(int *data1, int *nrep, int *size, int *met, double *qprior, double *
 		    {
 		      stateZ[j*S+s]=1;
 		      sumZ1[j]=sumZ1[j]+data[j*S+s];
-		      nZ1[j]=nZ1[j]++;
+		      nZ1[j]++;
 		    }
 		  else
 		    {
@@ -422,12 +469,12 @@ void MRFrep(int *data1, int *nrep, int *size, int *met, double *qprior, double *
 			{
 			  stateZ[j*S+s]=1;
 			  sumZ1[j]=sumZ1[j]+data[j*S+s]; //To get sum_s Y_sI(X_s=0, Z_s=1)
-			  nZ1[j]=nZ1[j]++;//To get sum_s I(X_s=0, Z_s=1)
+			  nZ1[j]++;//To get sum_s I(X_s=0, Z_s=1)
 			}
 		      else
 			{
 			  stateZ[j*S+s]=0;
-			  nZ0[j]=nZ0[j]++;//To get sum_s I(X_s=0, Z_s=0)
+			  nZ0[j]++;//To get sum_s I(X_s=0, Z_s=0)
 			}
 		    }
 		}
@@ -514,7 +561,7 @@ void MRFrep(int *data1, int *nrep, int *size, int *met, double *qprior, double *
 	      sumgammaphi1=0;
 	      for (s=0;s<S;s++)
 		{
-		  if (stateX[s]==1&data[j*S+s]>0)
+		  if ((stateX[s]==1)&(data[j*S+s]>0))
 		    {
 		      for (j2=0;j2<data[j*S+s];j2++)
 			{
@@ -597,14 +644,14 @@ void MRFrep(int *data1, int *nrep, int *size, int *met, double *qprior, double *
 	      sumgammaphi1=0;
 	      for (s=0;s<S;s++)
 		{
-		  if (stateX[s]==0&stateZ[j*S+s]==1&data[j*S+s]>0)
+		  if ((stateX[s]==0)&(stateZ[j*S+s]==1)&(data[j*S+s]>0))
 		    {
 		      for (j2=0;j2<data[j*S+s];j2++)
 			{
 			  sumgammaphi0=sumgammaphi0+log(propphi0+j2)-log(phi[j*I+0]+j2);
 			}
 		    }
-		  if (stateX[s]==1&data[j*S+s]>0)
+		  if ((stateX[s]==1)&(data[j*S+s]>0))
 		    {
 		      for (j2=0;j2<data[j*S+s];j2++)
 			{
@@ -657,7 +704,7 @@ void MRFrep(int *data1, int *nrep, int *size, int *met, double *qprior, double *
       
       // iteration step 4. pass the results back to R
       //Rprintf("%d %d\n", z, j1*10+bN);
-      if (z>=bN&z==j1*10+bN)
+      if ((z>=bN)&(z==j1*10+bN))
 	{
 	  *(es_q0+j1)=q[0];
 	  *(es_q1+j1)=q[1];
@@ -672,7 +719,7 @@ void MRFrep(int *data1, int *nrep, int *size, int *met, double *qprior, double *
 	      *(es_phi0+j1*nr+j)=phi[j*I+0];
 	    }
 	  *(loglikeli+j1)=logl;  
-	  j1=j1++;
+	  j1++;
 	}    
       if (z==z1*jN)
 	{
@@ -682,7 +729,7 @@ void MRFrep(int *data1, int *nrep, int *size, int *met, double *qprior, double *
       
       /* if (z==j1*1000)
 	 {
-	 j1=j1++;
+	 j1++;
 	 Rprintf("MCMC step= %d \n", z);
 	 Rprintf("transition probability= %lf %lf\n", q[1], q[0]);
 	 for (j=0;j<nr;j++)

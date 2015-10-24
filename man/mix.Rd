@@ -56,7 +56,7 @@ For a NB mixture model, mu_S and phi_S are the mean and overdispersion of the si
 \item{method}{The method used for the analysis}
 }
 \references{
-Bao et al. Accounting for immunoprecipitation efficiencies in the statistical analysis of ChIP-seq data. BMC Bioinformatics 2013, 14:169 doi:10.1186/1471-2105-14-169.
+Bao et al. Accounting for immunoprecipitation efficiencies in the statistical analysis of ChIP-seq data. BMC Bioinformatics 2013, 14:169 DOI:10.1186/1471-2105-14-169.
 }
 \author{
 Yanchun Bao and Veronica Vinciotti 
@@ -68,10 +68,10 @@ See also \code{\link{mix.joint}, \link{enrich.mix}}
 data(p300cbp.1000bp)
 exp.label=c("CBPT0", "CBPT301", "CBPT302", "p300T0", 
 "p300T301", "p300T302", "WangCBP", "Wangp300")
-## Simple examples -- only two experiments and first 10000 observations
+## Simple examples -- only two experiments and first 5000 observations
 CBPT30=list()
-CBPT30$region=p300cbp.1000bp$region[1:10000,]
-CBPT30$count=p300cbp.1000bp$count[1:10000,2:3]
+CBPT30$region=p300cbp.1000bp$region[1:5000,]
+CBPT30$count=p300cbp.1000bp$count[1:5000,2:3]
 Poissonfit.simple<-mix(CBPT30, method="Poisson", exp.label=exp.label[c(2,3)])
 
 \dontrun{

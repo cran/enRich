@@ -46,7 +46,7 @@ A numeric variable. The level of FDR for identifying the differentially bound re
 \item{IPE}{A p-dimensional vector of estimated IP efficiency values for each experiment.}
 }
 \references{
-Bao et al. Accounting for immunoprecipitation efficiencies in the statistical analysis of ChIP-seq data. BMC Bioinformatics 2013, 14:169 doi:10.1186/1471-2105-14-169.
+Bao et al. Accounting for immunoprecipitation efficiencies in the statistical analysis of ChIP-seq data. BMC Bioinformatics 2013, 14:169 DOI:10.1186/1471-2105-14-169.
 }
 \author{
 Yanchun Bao and Veronica Vinciotti
@@ -61,8 +61,8 @@ exp.label=c("CBPT0", "CBPT301", "CBPT302", "p300T0",
 
 ## Simple examples -- only two experiments and first 10000 observations
 CBPT30=list()
-CBPT30$region=p300cbp.1000bp$region[1:10000,]
-CBPT30$count=p300cbp.1000bp$count[1:10000,2:3]
+CBPT30$region=p300cbp.1000bp$region[1:5000,]
+CBPT30$count=p300cbp.1000bp$count[1:5000,2:3]
 Poisfit.simple<-mix(CBPT30, method="Poisson", exp.label=exp.label[c(2,3)])
 enrich.mix.simple<-enrich.mix(Poisfit.simple, analysis="separate")
 

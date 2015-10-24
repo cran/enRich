@@ -3,7 +3,7 @@ mix.joint <-function(data, method=NULL, para.sep=NULL, rep.vec=NULL, p.vec=NULL,
 ## INPUT
 ## data: list of data, the first list is the region, which is a n x 3 matrix, where the name of the columns are  ("Chromosome", "Start", "Stop")
 ##          the second list contains the counts of ChIP experiments, which is a n x p matrix, where n is the number of regions and p is the number of experiments. 
-##          At least two experiment count should be given.
+##          At least two experiments count should be given.
 ## para.sep: the initial parameter used for mix.joint fitting. It could be the result of the mix function or given by user. 
 ## method: Can be "Poisson" or "NB" and it refers to the densities of the mixture distribution.
 ## rep.vec: the vector of replicate indices, of length equal to the number of experiments. Technical replicates share the same index, 

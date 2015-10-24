@@ -21,7 +21,7 @@ A charater variable. Can be "poisson" or "NB" and it refers to the densities of 
 IPE estimated value.
 }
 \references{
-Bao et al. Accounting for immunoprecipitation efficiencies in the statistical analysis of ChIP-seq data. BMC Bioinformatics 2013, 14:169 doi:10.1186/1471-2105-14-169.
+Bao et al. Accounting for immunoprecipitation efficiencies in the statistical analysis of ChIP-seq data. BMC Bioinformatics 2013, 14:169 DOI:10.1186/1471-2105-14-169.
 }
 \author{
 Yanchun Bao and Veronica Vinciotti 

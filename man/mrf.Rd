@@ -45,7 +45,7 @@ The samples are collected one from every ten steps right after burn-in step. The
 \item{acrate.NB}{The acceptance rate of Metropolis-Hastling method.}
 }
 \references{
-Bao et al. Joint modelling of ChIP-seq data via a Markov random field model, 2013.
+Bao et al. Joint modelling of ChIP-seq data via a Markov random field model, Biostatistics 2014, 15(2):296-310 DOI:10.1093/biostatistics/kxt047.
 }
 \author{
 Yanchun Bao and Veronica Vinciotti 

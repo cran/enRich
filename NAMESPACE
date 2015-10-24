@@ -1,3 +1,6 @@
 useDynLib(enRich)
 export(mrf, mrf.joint, enrich.mrf, enrich.mix, FDR, IPE, mix, mix.joint)
+importFrom("stats", approx, dnbinom, dpois, optim, pnbinom, ppois)
+importFrom("utils", sessionInfo)
+import("parallel")
 
