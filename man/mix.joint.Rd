@@ -69,6 +69,7 @@ Yanchun Bao and Veronica Vinciotti
 See also \code{\link{mix}, \link{enrich.mix}}
 }
 \examples{
+tempdir()
 data(p300cbp.1000bp)
 exp.label=c("CBPT0", "CBPT301", "CBPT302", "p300T0", 
     "p300T301", "p300T302", "WangCBP", "Wangp300")
@@ -81,22 +82,6 @@ Poisfit.simple<-mix(CBPT30, method="Poisson", exp.label=exp.label[c(2,3)])
 ##   (CBPT301,CBPT302)
 Poisfit.joint<-mix.joint(CBPT30, Poisfit.simple$parameters, method="Poisson", 
     rep.vec=c(1,1), p.vec=c(1,1), exp.label=exp.label[c(2,3)]) 
-
-\dontrun{
-##separate analysis of single experiments using a Poisson latent mixture model for all 8 data sets
-Poisfit.separate<-mix(p300cbp.1000bp, method="Poisson", exp.label=exp.label)
-
-## Joint analysis combining technical replicates 
-##   (CBPT301,CBPT302 and p300T301,p300T302)
-Poisfit.joint1<-mix.joint(p300cbp.1000bp, Poisfit.separate$parameters, method="Poisson", 
-    rep.vec=c(1,2,2,3,4,4,5,6), p.vec=c(1,2,2,3,4,4,5,6), 
-    exp.label=exp.label) 
-
-## Joint analysis, assuming the same p for two different proteins 
-##   at the same time point
-Poisfit.joint2<-mix.joint(p300cbp.1000bp, Poisfit.separate$parameters, method="Poisson", 
-    rep.vec=c(1,2,2,3,4,4,5,6), p.vec=c(1,2,2,1,2,2,5,5), exp.label=exp.label) 
-}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

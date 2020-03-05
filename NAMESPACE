@@ -1,4 +1,4 @@
-useDynLib(enRich)
+useDynLib(enRich, .registration=TRUE)
 export(mrf, mrf.joint, enrich.mrf, enrich.mix, FDR, IPE, mix, mix.joint)
 importFrom("stats", approx, dnbinom, dpois, optim, pnbinom, ppois)
 importFrom("utils", sessionInfo)

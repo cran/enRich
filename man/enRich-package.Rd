@@ -3,7 +3,7 @@
 \alias{enRich}
 \docType{package}
 \title{
-An R package for the analysis of multiple ChIP-seq data.
+Analysis of multiple ChIP-seq data.
 }
 \description{
 enRich is an R package that performs a joint statistical modelling of ChIP-seq data, accounting for technical/biological replicates, multiple conditions and
@@ -13,8 +13,8 @@ the different IP efficiencies of individual experiments.
 \tabular{ll}{
 Package: \tab enRich\cr
 Type: \tab Package\cr
-Version: \tab 3.0\cr
-Date: \tab 2015-10-19\cr
+Version: \tab 3.1\cr
+Date: \tab 2020-02-03\cr
 Depends: \tab R(>= 3.2.2), parallel\cr
 License: \tab GPL (>=2)\cr
 LazyLoad: \tab yes\cr

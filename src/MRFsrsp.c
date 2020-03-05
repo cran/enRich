@@ -844,6 +844,8 @@ void MRFsrsp(int *data1, int *data2, int *nsr, int *nsp, int *size, int *met, do
     }	    
 
   double  sdq0rep1, *sdq0nrep1, sdq0rep2, *sdq0nrep2, *rate;
+  sdq0rep1=0;
+  sdq0rep2=0;
   sdq0nrep1=(double*)malloc(sizeof(double*)*nsp1);
   sdq0nrep2=(double*)malloc(sizeof(double*)*nsp2);
   int nrate=indexnsr1+indexnsr2+nsp1+nsp2+1;

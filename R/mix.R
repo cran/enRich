@@ -1,4 +1,4 @@
-mix<-function(data, method=NULL, initialpara=NULL,fixoffset=FALSE, fixk=3,krange=c(0:10), exp.label=NULL, stopdiff=0.0001, parallel=TRUE)
+mix<-function(data, method=NULL, initialpara=NULL,fixoffset=FALSE, fixk=3,krange=c(0:10), exp.label=NULL, stopdiff=0.0001, parallel=FALSE)
 {
 ## INPUT
 ## data: list of data, the first list is the region, which is a n x 3 matrix, where the name of the columns are  ("Chromosome", "Start", "Stop")

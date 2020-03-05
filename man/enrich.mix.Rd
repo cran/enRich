@@ -55,37 +55,17 @@ Yanchun Bao and Veronica Vinciotti
 See also \code{\link{mix}, \link{mix.joint}}
 }
 \examples{
+tempdir()
 data(p300cbp.1000bp)
 exp.label=c("CBPT0", "CBPT301", "CBPT302", "p300T0", 
     "p300T301", "p300T302", "WangCBP", "Wangp300")
 
-## Simple examples -- only two experiments and first 10000 observations
+## Simple examples -- only two experiments and first 5000 observations
 CBPT30=list()
 CBPT30$region=p300cbp.1000bp$region[1:5000,]
 CBPT30$count=p300cbp.1000bp$count[1:5000,2:3]
 Poisfit.simple<-mix(CBPT30, method="Poisson", exp.label=exp.label[c(2,3)])
 enrich.mix.simple<-enrich.mix(Poisfit.simple, analysis="separate")
-
-\dontrun{
-##Separate analysis of single experiments using a Poisson latent mixture model for all 8 data sets
-Poisfit.separate<-mix(p300cbp.1000bp, method="Poisson", exp.label=exp.label)
-
-##Enriched regions for all conditions and differentially bound 
-## regions between CBP and p300 at T0 using 5% FDR
-enrich.mix.sep<-enrich.mix(Poisfit.separate, analysis="separate", 
-   differential=TRUE, diff.vec=c(1,0,0,2,0,0,0,0))
-
-## Joint analysis combining technical replicates 
-##   (CBPT301,CBPT302 and p300T301,p300T302)
-Poisfit.joint1<-mix.joint(p300cbp.1000bp, Poisfit.separate$parameters, method="Poisson", 
-    rep.vec=c(1,2,2,3,4,4,5,6), p.vec=c(1,2,2,3,4,4,5,6), 
-    exp.label=exp.label) 
-
-##Enriched regions for all conditions and differentially bound 
-## regions between CBP and p300 at T30 using 5% FDR
-enrich.mix.j<-enrich.mix(Poisfit.joint1, differential=TRUE, 
-   diff.vec=c(0,1,1,0,2,2,0,0))
-}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

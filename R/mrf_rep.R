@@ -1,5 +1,5 @@
 mrf_rep<-function(data1, method=method, Niterations=10000, Nburnin=5000, Poisprior=NULL, NBprior=NULL, PoisNBprior=NULL, var.NB=NULL)
-{	
+{
 	data1=as.matrix(data1)
 	Nrep=ncol(data1)#we expect have p experiment, so data1 is in form of matrix with n row and p col.
 	Na=Niterations
@@ -38,7 +38,7 @@ mrf_rep<-function(data1, method=method, Niterations=10000, Nburnin=5000, Poispri
 		if (is.null(Poisprior))
 		{
 			Poisprior=rep(c(0, 0, 0.5, 1), Nrep)
-		}	
+		}
 		if (is.null(NBprior))
 		{
 			NBprior=rep(c(5, 1, 1, 1, 0, 0, 0, 0), Nrep)
@@ -46,7 +46,7 @@ mrf_rep<-function(data1, method=method, Niterations=10000, Nburnin=5000, Poispri
 		if (is.null(var.NB))
 		{
 			var.NB=rep(c(0.1, 0.1, 0, 0), Nrep)
-		}	
+		}
 		if (length(var.NB)==2*Nrep)
 		{
 			tvar.NB=NULL
@@ -54,9 +54,9 @@ mrf_rep<-function(data1, method=method, Niterations=10000, Nburnin=5000, Poispri
 			{
 				tvar.NB=c(tvar.NB, var.NB[((i-1)*2+1):((i-1)*2+2)], 0, 0)
 			}
-			var.NB=tvar.NB 
+			var.NB=tvar.NB
 		}
-	}	
+	}
 	if (method=="Poisson")
 	{
 		met=1
@@ -78,9 +78,9 @@ mrf_rep<-function(data1, method=method, Niterations=10000, Nburnin=5000, Poispri
 		if (is.null(var.NB))
 		{
 			var.NB=rep(c(0.1, 0.1, 0.1, 0.1), Nrep)
-		}		
+		}
 	}
-	temp=.C("MRFrep", as.integer(newdata1), as.integer(Nrep), as.integer(size), as.integer(met), as.double(qprior), as.double(piprior), as.double(Poisprior), as.double(NBprior), as.integer(Na), as.integer(Nb), as.integer(jumpN), as.double(var.NB), PP=as.double(PP), es_pi=as.double(es_pi), es_q1=as.double(es_q1), es_q0=as.double(es_q0), es_lambda1=as.double(es_lambda1),  es_mu1=as.double(es_mu1), es_phi1=as.double(es_phi1), es_lambda0=as.double(es_lambda0), es_mu0=as.double(es_mu0), es_phi0=as.double(es_phi0), loglikeli=as.double(loglikeli), acrate=as.double(acrate), PACKAGE = "enRich")
+	temp=.C("MRFrep", as.integer(newdata1), as.integer(Nrep), as.integer(size), as.integer(met), as.double(qprior), as.double(piprior), as.double(Poisprior), as.double(NBprior), as.integer(Na), as.integer(Nb), as.integer(jumpN), as.double(var.NB), PP=as.double(PP), es_pi=as.double(es_pi), es_q1=as.double(es_q1), es_q0=as.double(es_q0), es_lambda1=as.double(es_lambda1),  es_mu1=as.double(es_mu1), es_phi1=as.double(es_phi1), es_lambda0=as.double(es_lambda0), es_mu0=as.double(es_mu0), es_phi0=as.double(es_phi0), loglikeli=as.double(loglikeli), acrate=as.double(acrate))#, PACKAGE = "enRich")
 	pi=t(matrix(temp$es_pi, Nrep, Nsample))
 	mu1=t(matrix(temp$es_mu1, Nrep, Nsample))
 	phi1=t(matrix(temp$es_phi1, Nrep, Nsample))
@@ -92,7 +92,7 @@ mrf_rep<-function(data1, method=method, Niterations=10000, Nburnin=5000, Poispri
 	q0=temp$es_q0
 	para=list()
 	if (met==0)
-	{	
+	{
 		for (i in 1:Nrep)
 		{
 			para[[i]]=cbind(q1=q1, q0=q0, mu1=mu1[,i], phi1=phi1[,i],pi=pi[,i], lambda0=lambda0[,i])

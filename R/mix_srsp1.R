@@ -53,7 +53,7 @@ mix_srsp1 <-function(datasr, datasp, method=NULL, initialpara_sr, initialpara_sp
 				para_sp=c(para_sp, initialpara_sp[((i-1)*6+2):((i-1)*6+6)])
 			}
 		}
-	}	
+	}
    	p=temp1/(sum(Nsr)+sum(Nsp))
    	para=c(p, para_sr, para_sp)
    	k1=1
@@ -63,11 +63,11 @@ mix_srsp1 <-function(datasr, datasp, method=NULL, initialpara_sr, initialpara_sp
 	if (Nsp==1)
 	datasp=cbind(datasp, 0)
 
-   	#Iterative steps 
+   	#Iterative steps
    	while (any(difference>stopdiff)&(k1<stopN))
    	{
       		paratemp=para
-  	 
+
 		#1 iterative classification (E-step)
 	 	pr1=matrix(0, N, Np)
    		pr0=matrix(0, N, Np)
@@ -82,14 +82,14 @@ mix_srsp1 <-function(datasr, datasp, method=NULL, initialpara_sr, initialpara_sp
 				{
                    			j2=sum(Nsr[0:(j-1)])+j1
 					if (method=="Poisson")
-					{	
+					{
 	            				pr1[,j]=pr1[,j]+ifelse(datasr[,j2]<para_sr[(j2-1)*3+3], log(0.00001), dpois(datasr[,j2]-para_sr[(j2-1)*3+3],para_sr[(j2-1)*3+1], log=TRUE))
 			   			pr0[,j]=pr0[,j]+dpois(datasr[,j2], para_sr[(j2-1)*3+2], log=TRUE)
 					}
 					if (method=="NB")
-					{	
-	      		      			pr1[,j]=pr1[,j]+ifelse(datasr[,j2]<para_sr[(j2-1)*5+5], log(0.00001), dnbinom(datasr[,j2]-para_sr[(j2-1)*5+5], para_sr[(j2-1)*5+2],,para_sr[(j2-1)*5+1], log=TRUE))
-				   		pr0[,j]=pr0[,j]+dnbinom(datasr[,j2], para_sr[(j2-1)*5+4],,para_sr[(j2-1)*5+3], log=TRUE)
+					{
+	      		      			pr1[,j]=pr1[,j]+ifelse(datasr[,j2]<para_sr[(j2-1)*5+5], log(0.00001), dnbinom(datasr[,j2]-para_sr[(j2-1)*5+5], para_sr[(j2-1)*5+2],para_sr[(j2-1)*5+1], log=TRUE))
+				   		pr0[,j]=pr0[,j]+dnbinom(datasr[,j2], para_sr[(j2-1)*5+4],para_sr[(j2-1)*5+3], log=TRUE)
 					}
              	 	}
 			}
@@ -97,7 +97,7 @@ mix_srsp1 <-function(datasr, datasp, method=NULL, initialpara_sr, initialpara_sp
 		if (Nsp>0)
 		{
 			for (j in (Ns+1):Np)## same p for non-replicates
-			{	
+			{
 				j2=j-Ns
 				if (method=="Poisson")
 				{
@@ -106,11 +106,11 @@ mix_srsp1 <-function(datasr, datasp, method=NULL, initialpara_sr, initialpara_sp
 				}
 				if (method=="NB")
 				{
-					pr1[, j]=ifelse(datasp[,j2]<para_sp[(j2-1)*5+5], log(0.00001), dnbinom(datasp[,j2]-para_sp[(j2-1)*5+5], para_sp[(j2-1)*5+2],,para_sp[(j2-1)*5+1], log=TRUE))
-	   				pr0[, j]=dnbinom(datasp[,j2], para_sp[(j2-1)*5+4],,para_sp[(j2-1)*5+3], log=TRUE)
+					pr1[, j]=ifelse(datasp[,j2]<para_sp[(j2-1)*5+5], log(0.00001), dnbinom(datasp[,j2]-para_sp[(j2-1)*5+5], para_sp[(j2-1)*5+2],para_sp[(j2-1)*5+1], log=TRUE))
+	   				pr0[, j]=dnbinom(datasp[,j2], para_sp[(j2-1)*5+4],para_sp[(j2-1)*5+3], log=TRUE)
 				}
 			}
-		}        
+		}
 		for (j in 1:Np)
 		{
              	pr1[,j]=pr1[,j]+log(p)
@@ -147,7 +147,7 @@ mix_srsp1 <-function(datasr, datasp, method=NULL, initialpara_sr, initialpara_sp
 		if (Nsp>0)
 		{
 			for (j in (Ns+1):Np)## same p for non-replicates
-			{	
+			{
 				j2=j-Ns
 				if (method=="Poisson")
 				{
@@ -167,45 +167,21 @@ mix_srsp1 <-function(datasr, datasp, method=NULL, initialpara_sr, initialpara_sp
 		para=c(p, para_sr, para_sp)
 	      difference=abs(para-paratemp)
       		k1=k1+1
-   	}
+  }
+   	#para1=c(para_sr, para_sp)
 
-	## subfunction
-	arrpara<-function(para, method)
-	{
-		if (method=="Poisson")
-		{
-			Nexp=length(para)/3
-			parameter=matrix(0, Nexp, 3)
-			colnames(parameter)=c("lambda_S", "lambda_B", "k")
-			for (j in 1:Nexp)
-	   		{
-				parameter[j,1:3]=para[((j-1)*3+1):((j-1)*3+3)]
-			}
-	   	}
-		if (method=="NB")
-		{
-			Nexp=length(para)/5
-	   		parameter=matrix(0, Nexp, 5)
-	   		colnames(parameter)=c("mus", "phis", "mub", "phib", "k")
-		   	for (j in 1:Nexp)
-   			{
-				parameter[j,1:5]=para[((j-1)*5+1):((j-1)*5+5)]
-	   		}
-		}
-	   	rownames(parameter)=rownames(parameter,  do.NULL = FALSE, prefix = "Experiment")
-   		return(parameter)
-	}
+
 	if (Ns>0)
 	{
 		temp_sr=arrpara(para_sr, method=method)
 	   	temp_sr=cbind(rep(p,sum(Nsr)), temp_sr)
-		colnames(temp_sr)[1]="p" 	
+		colnames(temp_sr)[1]="p"
 		temp_sr=round(temp_sr, digits=4)
 	}else
 	{
 		temp_sr=NULL
 	}
-	if (Np>0)
+	if (Nsp>0) ## used to be if (Np>0) but it's always satisfy but para_sp has no value so
 	{
 		temp_sp=arrpara(para_sp, method=method)
    		temp_sp=cbind(rep(p,sum(Nsp)), temp_sp)
@@ -213,8 +189,39 @@ mix_srsp1 <-function(datasr, datasp, method=NULL, initialpara_sr, initialpara_sp
 		temp_sp=round(temp_sp, digits=4)
 	}else
 	{
-		temp_sr=NULL
+		temp_sp=NULL
 	}
+
+
    	parameter=list(para_sr=temp_sr, para_sp=temp_sp)
 	return(parameter)
+}
+
+## subfunction
+arrpara<-function(npara, method)
+{
+  if (method=="Poisson")
+  {
+    Nexp=length(npara)/3
+    #Nexp=floor(length(npara)/3)
+    parameter=matrix(0, Nexp, 3)
+    colnames(parameter)=c("lambda_S", "lambda_B", "k")
+    for (j in 1:Nexp)
+    {
+      parameter[j,1:3]=npara[((j-1)*3+1):((j-1)*3+3)]
+    }
+  }
+  if (method=="NB")
+  {
+    Nexp=length(npara)/5
+    #Nexp=floor(length(npara)/5)
+    parameter=matrix(0, Nexp, 5)
+    colnames(parameter)=c("mus", "phis", "mub", "phib", "k")
+    for (j in 1:Nexp)
+    {
+      parameter[j,1:5]=npara[((j-1)*5+1):((j-1)*5+5)]
+    }
+  }
+  rownames(parameter)=rownames(parameter,  do.NULL = FALSE, prefix = "Experiment")
+  return(parameter)
 }

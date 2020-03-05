@@ -53,15 +53,4 @@ Yanchun Bao and Veronica Vinciotti
 \seealso{
 #See also \code{\link{mrf.joint}, \link{enrich.mrf}}
 }
-\examples{
-data(p300cbp.200bp)
-CBPT0=list()
-CBPT0$region=p300cbp.200bp$region
-CBPT0$count=p300cbp.200bp$count[,1]
-
-\dontrun{
-##separate analysis of a single experiment using a ZINB-NB Markov random field model
-CBPT0.mrf<-mrf(CBPT0, method="NB", exp.label="CBPT0")
-}
-}
 

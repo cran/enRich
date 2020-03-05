@@ -11,7 +11,7 @@ The emission distribution of the  enriched state (signal) could be either Poisso
 \usage{
 mrf.joint(data, method = NULL, rep.vec = NULL, p.vec = NULL, exp.label = NULL, 
       Niterations = 10000, Nburnin = 5000, Poisprior = NULL, NBprior = NULL, 
-      PoisNBprior = NULL, var.NB = NULL, var.q=NULL, parallel=TRUE)
+      PoisNBprior = NULL, var.NB = NULL, var.q=NULL, parallel=FALSE)
 }
 \arguments{
  \item{data}{
@@ -72,26 +72,5 @@ Yanchun Bao and Veronica Vinciotti
 }
 \seealso{
 #See also \code{\link{mrf.joint}, \link{enrich.mrf}}
-}
-\examples{
-data(p300cbp.200bp)
-exp.label=c("CBPT0", "CBPT301", "CBPT302", "p300T0", 
-    "p300T301", "p300T302", "WangCBP", "Wangp300")
-CBPT30=list()
-CBPT30$region=p300cbp.200bp$region[200001:210000,]
-CBPT30$count=p300cbp.200bp$count[200001:210000,2:3]
-\dontrun{
-NBfit.simple<-mrf.joint(CBPT30, method="NB", rep.vec=c(1,1),
-    p.vec=c(1,1), exp.label=exp.label[c(2,3)])
-
-## Joint analysis combining technical replicates 
-##   (CBPT301,CBPT302) and (p300T301, p300T302)
-p300cbp.mrf<-mrf.joint(p300cbp.200bp, method="NB", 
-    rep.vec=c(1,2,2,3,4,4,5,6), p.vec=c(1,2,2,3,4,4,5,6), exp.label=exp.label)
-    
-## Joint analysis, assuming the same p for two different proteins 
-p300cbp.mrf.p<-mrf.joint(p300cbp.200bp, method="NB", 
-    rep.vec=c(1,2,2,3,4,4,5,6), p.vec=c(1,2,2,1,2,2,3,3), exp.label=exp.label)
-}
 }
 

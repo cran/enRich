@@ -1,4 +1,4 @@
-mrf.joint <-function(data, method=NULL, rep.vec=NULL, p.vec=NULL, exp.label=NULL, Niterations=10000, Nburnin=5000, Poisprior=NULL, NBprior=NULL, PoisNBprior=NULL, var.NB=NULL, var.q=NULL, parallel=TRUE)
+mrf.joint <-function(data, method=NULL, rep.vec=NULL, p.vec=NULL, exp.label=NULL, Niterations=10000, Nburnin=5000, Poisprior=NULL, NBprior=NULL, PoisNBprior=NULL, var.NB=NULL, var.q=NULL, parallel=FALSE)
 {
 ## INPUT
 ## data: list of data, the first list is the region, which is a n x 3 matrix, where the name of the columns are ("chr", "start", "end")

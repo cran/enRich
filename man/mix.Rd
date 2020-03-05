@@ -11,7 +11,7 @@ Fitting mixture of two densities, either Poisson or Negative Binomial, to ChIP-s
 }
 \usage{
 mix(data, method = NULL, initialpara=NULL, fixoffset=FALSE, fixk=3,krange=c(0:10), 
-     exp.label=NULL, stopdiff=1e-04, parallel=TRUE)
+     exp.label=NULL, stopdiff=1e-04, parallel=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -65,6 +65,7 @@ Yanchun Bao and Veronica Vinciotti
 See also \code{\link{mix.joint}, \link{enrich.mix}}
 }
 \examples{
+tempdir()
 data(p300cbp.1000bp)
 exp.label=c("CBPT0", "CBPT301", "CBPT302", "p300T0", 
 "p300T301", "p300T302", "WangCBP", "Wangp300")
@@ -73,13 +74,6 @@ CBPT30=list()
 CBPT30$region=p300cbp.1000bp$region[1:5000,]
 CBPT30$count=p300cbp.1000bp$count[1:5000,2:3]
 Poissonfit.simple<-mix(CBPT30, method="Poisson", exp.label=exp.label[c(2,3)])
-
-\dontrun{
-##separate analysis of single experiments using a Poisson latent mixture model for all 8 data sets
-Poisfit.separate<-mix(p300cbp.1000bp, method="Poisson", exp.label=exp.label)
-##separate analysis of single experiments using a NB latent mixture model for all 8 data sets
-NB.separate<-mix(p300cbp.1000bp, method="NB", exp.label=exp.label)
-}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
